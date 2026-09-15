@@ -18,3 +18,8 @@ node_modules
 
 apps/api/uploads/*
 !apps/api/uploads/.gitkeep
+
+# Environment files
+.env
+.env.*
+!.env.example
