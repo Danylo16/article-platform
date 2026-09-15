@@ -8,6 +8,7 @@ import { HomePage } from "./pages/HomePage";
 import { ArticlePage } from "./pages/ArticlePage";
 import { AdminArticlesPage } from "./pages/admin/AdminArticlesPage"; 
 import { AdminArticleEditorPage } from "./pages/admin/AdminArticleEditorPage";
+import { AdminContentPage } from "./pages/admin/AdminContentPage";
 
 function App() {
   return (
@@ -35,8 +36,8 @@ function App() {
         />
 
         <Route
-          path="/admin/articles/:id"
-          element={<AdminArticleEditorPage />}
+          path="/admin/content"
+          element={<AdminContentPage />}
         />
       </Routes>
     </BrowserRouter>

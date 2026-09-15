@@ -47,6 +47,7 @@ export const UpdateArticleSchema = z.object({
   subtitle: z.string().trim().max(300).nullable().optional(),
   excerpt: z.string().trim().max(500).nullable().optional(),
   content: z.string().min(1).optional(),
+  authorId: z.string().uuid().optional(),
   coverImage: z
   .string()
   .min(1)

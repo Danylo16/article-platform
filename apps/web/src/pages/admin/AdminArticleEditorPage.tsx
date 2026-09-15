@@ -1,12 +1,14 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
 import {
   useNavigate,
   useParams,
+  Link,
 } from "react-router-dom";
 
 import ReactMarkdown from "react-markdown";
@@ -30,6 +32,9 @@ import type {
   Category,
   Tag,
 } from "../../types/article";
+import { getMediaUrl } from "../../api/media";
+import { ArticleMarkdownImage } from "../../components/ArticleMarkdownImage";
+import { InlineMediaEditor } from "../../components/admin/InlineMediaEditor";
 
 import "./AdminArticleEditorPage.css";
 
@@ -60,6 +65,7 @@ export function AdminArticleEditorPage() {
   const navigate = useNavigate();
 
   const isNew = !id;
+  const markdownEditorRef = useRef<HTMLTextAreaElement>(null);
 
   const [article, setArticle] =
     useState<Article | null>(null);
@@ -321,8 +327,11 @@ export function AdminArticleEditorPage() {
             form.content,
 
           coverImage:
-            form.coverImage ||
-            null,
+              form.coverImage ||
+              null,
+
+          authorId:
+            form.authorId,
 
           categoryId:
             form.categoryId ||
@@ -437,6 +446,15 @@ export function AdminArticleEditorPage() {
         </div>
 
         <div className="editor-actions">
+          <Link
+            className="button button-secondary"
+            to="/admin/content"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Manage content data
+          </Link>
+
           <button
             className="button button-secondary"
             type="button"
@@ -542,7 +560,7 @@ export function AdminArticleEditorPage() {
           {form.coverImage && (
             <div className="cover-preview">
               <img
-                src={`http://localhost:3000${form.coverImage}`}
+                src={getMediaUrl(form.coverImage) ?? ""}
                 alt="Article cover preview"
               />
 
@@ -758,7 +776,14 @@ export function AdminArticleEditorPage() {
             </span>
           </div>
 
+          <InlineMediaEditor
+            content={form.content}
+            onChange={(content) => updateField("content", content)}
+            textareaRef={markdownEditorRef}
+          />
+
           <textarea
+            ref={markdownEditorRef}
             className="markdown-editor"
             value={
               form.content
@@ -786,6 +811,9 @@ export function AdminArticleEditorPage() {
                 remarkPlugins={[
                   remarkGfm,
                 ]}
+                components={{
+                  img: ArticleMarkdownImage,
+                }}
               >
                 {form.content}
               </ReactMarkdown>

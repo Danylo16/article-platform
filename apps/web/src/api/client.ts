@@ -93,6 +93,7 @@ export async function updateArticle(
     excerpt: string | null;
     content: string;
     coverImage: string | null;
+    authorId: string;
     categoryId: string | null;
     tagIds: string[];
   }>,
@@ -184,6 +185,51 @@ export async function getCategories(): Promise<Category[]> {
   return response.json();
 }
 
+export async function createCategory(name: string): Promise<Category> {
+  const response = await fetch(`${API_URL}/admin/categories`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create category");
+  }
+
+  return response.json();
+}
+
+export async function updateCategory(
+  id: string,
+  name: string,
+): Promise<Category> {
+  const response = await fetch(`${API_URL}/admin/categories/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update category");
+  }
+
+  return response.json();
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/admin/categories/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Category is still used by articles");
+  }
+}
+
 export async function getAuthors(): Promise<Author[]> {
   const response = await fetch(
     `${API_URL}/admin/authors`,
@@ -196,6 +242,59 @@ export async function getAuthors(): Promise<Author[]> {
   return response.json();
 }
 
+export async function createAuthor(input: {
+  name: string;
+  bio?: string | null;
+  avatarUrl?: string | null;
+}): Promise<Author> {
+  const response = await fetch(`${API_URL}/admin/authors`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create author");
+  }
+
+  return response.json();
+}
+
+export async function updateAuthor(
+  id: string,
+  input: {
+    name: string;
+    bio?: string | null;
+    avatarUrl?: string | null;
+  },
+): Promise<Author> {
+  const response = await fetch(`${API_URL}/admin/authors/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update author");
+  }
+
+  return response.json();
+}
+
+export async function deleteAuthor(id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/admin/authors/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Author is still assigned to articles");
+  }
+}
+
 export async function getTags(): Promise<Tag[]> {
   const response = await fetch(
     `${API_URL}/admin/tags`,
@@ -206,6 +305,51 @@ export async function getTags(): Promise<Tag[]> {
   }
 
   return response.json();
+}
+
+export async function createTag(name: string): Promise<Tag> {
+  const response = await fetch(`${API_URL}/admin/tags`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create tag");
+  }
+
+  return response.json();
+}
+
+export async function updateTag(
+  id: string,
+  name: string,
+): Promise<Tag> {
+  const response = await fetch(`${API_URL}/admin/tags/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update tag");
+  }
+
+  return response.json();
+}
+
+export async function deleteTag(id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/admin/tags/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Tag is still used by articles");
+  }
 }
 
 export async function uploadMedia(

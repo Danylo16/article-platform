@@ -33,9 +33,15 @@ export function AdminArticlesPage() {
       <header>
         <h1>Articles</h1>
 
-        <Link to="/admin/articles/new">
-          New article
-        </Link>
+        <div>
+          <Link to="/admin/content">
+            Authors, categories & tags
+          </Link>
+          {" · "}
+          <Link to="/admin/articles/new">
+            New article
+          </Link>
+        </div>
       </header>
 
       {articles.length === 0 ? (

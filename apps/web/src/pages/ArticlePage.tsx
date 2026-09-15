@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { getArticleBySlug } from "../api/client";
+import { ArticleMarkdownImage } from "../components/ArticleMarkdownImage";
 import type { Article } from "../types/article";
 
 export function ArticlePage() {
@@ -61,7 +62,12 @@ export function ArticlePage() {
       <hr />
 
       <article>
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            img: ArticleMarkdownImage,
+          }}
+        >
           {article.content}
         </ReactMarkdown>
       </article>

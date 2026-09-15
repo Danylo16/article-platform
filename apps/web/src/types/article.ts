@@ -9,18 +9,27 @@ export interface Author {
   name: string;
   bio: string | null;
   avatarUrl: string | null;
+  _count?: {
+    articles: number;
+  };
 }
 
 export interface Category {
   id: string;
   name: string;
   slug: string;
+  _count?: {
+    articles: number;
+  };
 }
 
 export interface Tag {
   id: string;
   name: string;
   slug: string;
+  _count?: {
+    articles: number;
+  };
 }
 
 export interface ArticleTag {

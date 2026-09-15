@@ -69,12 +69,16 @@
 }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 8px;
   padding: 10px 16px;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .button:disabled {
@@ -252,7 +256,7 @@
 .markdown-editor {
   display: block;
   width: 100%;
-  min-height: 588px;
+  min-height: 520px;
   padding: 22px;
   border: 0;
   resize: vertical;
