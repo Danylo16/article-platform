@@ -1,9 +1,26 @@
-import { PrismaClient } from '@prisma/client'
-import { Pool } from 'pg'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { config } from "dotenv";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../generated/prisma/client.js";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const connectionString = process.env.DATABASE_URL
-const pool = new Pool({ connectionString })
-const adapter = new PrismaPg(pool)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-export const prisma = new PrismaClient({ adapter })
+config({
+  path: resolve(__dirname, "../../.env"),
+});
+
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL is not defined");
+}
+
+const adapter = new PrismaPg({
+  connectionString,
+});
+
+export const prisma = new PrismaClient({
+  adapter,
+});

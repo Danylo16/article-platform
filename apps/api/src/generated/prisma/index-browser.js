@@ -141,8 +141,30 @@ exports.Prisma.ArticleScalarFieldEnum = {
   status: 'status',
   publishedAt: 'publishedAt',
   authorId: 'authorId',
+  categoryId: 'categoryId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TagScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ArticleTagScalarFieldEnum = {
+  articleId: 'articleId',
+  tagId: 'tagId'
 };
 
 exports.Prisma.SortOrder = {
@@ -168,7 +190,10 @@ exports.ArticleStatus = exports.$Enums.ArticleStatus = {
 
 exports.Prisma.ModelName = {
   Author: 'Author',
-  Article: 'Article'
+  Article: 'Article',
+  Category: 'Category',
+  Tag: 'Tag',
+  ArticleTag: 'ArticleTag'
 };
 
 /**

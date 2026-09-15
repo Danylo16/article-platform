@@ -1,0 +1,413 @@
+.editor-shell {
+  width: min(1440px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 40px 0 72px;
+}
+
+.editor-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 28px;
+}
+
+.editor-topbar h1 {
+  margin: 10px 0 0;
+  font-size: 34px;
+  line-height: 1.15;
+}
+
+.editor-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.status-draft,
+.status-new {
+  background: #f1f3f5;
+  color: #495057;
+}
+
+.status-published {
+  background: #d3f9d8;
+  color: #2b8a3e;
+}
+
+.status-scheduled {
+  background: #d0ebff;
+  color: #1864ab;
+}
+
+.status-archived {
+  background: #ffe3e3;
+  color: #c92a2a;
+}
+
+.save-message {
+  font-size: 14px;
+  color: #2b8a3e;
+}
+
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.button-primary {
+  background: #111;
+  color: white;
+}
+
+.button-secondary {
+  background: #f1f3f5;
+  color: #212529;
+}
+
+.button-publish {
+  background: #2f9e44;
+  color: white;
+}
+
+.button-danger {
+  background: #e03131;
+  color: white;
+}
+
+.editor-error {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fff5f5;
+  color: #c92a2a;
+}
+
+.editor-meta-card {
+  margin-bottom: 28px;
+  padding: 24px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: white;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field-wide {
+  grid-column: 1 / -1;
+}
+
+.form-field span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #495057;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  padding: 11px 12px;
+  font: inherit;
+  background: white;
+  outline: none;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: #868e96;
+}
+
+.form-field textarea {
+  resize: vertical;
+}
+
+.tags-block {
+  margin-top: 24px;
+}
+
+.tags-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #495057;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-chip {
+  border: 1px solid #dee2e6;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: white;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tag-chip:hover {
+  background: #f8f9fa;
+}
+
+.tag-chip-selected {
+  border-color: #111;
+  background: #111;
+  color: white;
+}
+
+.tag-empty {
+  color: #868e96;
+}
+
+.selected-tags {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #868e96;
+}
+
+.editor-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 640px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+}
+
+.editor-column,
+.preview-column {
+  min-width: 0;
+}
+
+.editor-column {
+  border-right: 1px solid #e9ecef;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 18px;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.column-header h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.column-header span {
+  font-size: 12px;
+  color: #868e96;
+}
+
+.markdown-editor {
+  display: block;
+  width: 100%;
+  min-height: 588px;
+  padding: 22px;
+  border: 0;
+  resize: vertical;
+  outline: none;
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.markdown-preview {
+  min-height: 588px;
+  padding: 30px;
+  overflow-wrap: anywhere;
+}
+
+.markdown-preview > :first-child {
+  margin-top: 0;
+}
+
+.markdown-preview h1 {
+  font-size: 34px;
+  line-height: 1.2;
+}
+
+.markdown-preview h2 {
+  margin-top: 32px;
+  font-size: 26px;
+}
+
+.markdown-preview h3 {
+  margin-top: 28px;
+  font-size: 21px;
+}
+
+.markdown-preview p,
+.markdown-preview li {
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.markdown-preview blockquote {
+  margin-left: 0;
+  padding-left: 18px;
+  border-left: 3px solid #ced4da;
+  color: #495057;
+}
+
+.markdown-preview pre {
+  overflow-x: auto;
+  padding: 16px;
+  border-radius: 8px;
+  background: #f1f3f5;
+}
+
+.markdown-preview code {
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+}
+
+.preview-empty {
+  color: #868e96;
+}
+
+@media (max-width: 900px) {
+  .editor-shell {
+    width: min(100% - 28px, 1440px);
+  }
+
+  .editor-topbar {
+    flex-direction: column;
+  }
+
+  .editor-actions {
+    justify-content: flex-start;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field-wide {
+    grid-column: auto;
+  }
+
+  .editor-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-column {
+    border-right: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+}
+
+.cover-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.cover-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.cover-header strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.cover-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #868e96;
+}
+
+.cover-upload-button {
+  display: inline-flex;
+  align-items: center;
+}
+
+.cover-preview {
+  position: relative;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f1f3f5;
+}
+
+.cover-preview img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+.cover-remove {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 11px;
+  background: rgba(0, 0, 0, 0.72);
+  color: white;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
