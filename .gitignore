@@ -23,3 +23,9 @@ apps/api/uploads/*
 .env
 .env.*
 !.env.example
+
+# Build output
+apps/api/dist/
+
+# Generated Prisma client
+apps/api/src/generated/prisma/
