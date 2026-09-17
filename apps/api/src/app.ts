@@ -1,28 +1,49 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import cookie from "@fastify/cookie";
+import rateLimit from "@fastify/rate-limit";
 import multipart from "@fastify/multipart";
+import helmet from "@fastify/helmet";
 import fastifyStatic from "@fastify/static";
 
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import {
+  dirname,
+  resolve,
+} from "node:path";
+
+import {
+  fileURLToPath,
+} from "node:url";
 
 import articlePublicRoutes from "./modules/articles/article.public.routes.js";
-import articleAdminRoutes from "./modules/articles/article.admin.routes.js";
-import categoryRoutes from "./modules/categories/category.routes.js";
-import tagRoutes from "./modules/tags/tag.routes.js";
-import authorRoutes from "./modules/authors/author.routes.js";
-import mediaRoutes from "./modules/media/media.routes.js";
+import authRoutes from "./modules/auth/auth.routes.js";
+import adminRoutes from "./modules/admin/admin.routes.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __filename =
+  fileURLToPath(import.meta.url);
+
+const __dirname =
+  dirname(__filename);
 
 export async function buildApp() {
   const app = Fastify({
     logger: true,
   });
 
+  const webOrigin =
+    process.env.WEB_ORIGIN ??
+    "http://localhost:5173";
+
+  await app.register(cookie);
+
+  await app.register(rateLimit, {
+    global: false,
+  });
+
   await app.register(cors, {
-    origin: "http://localhost:5173",
+    origin: webOrigin,
+    credentials: true,
+
     methods: [
       "GET",
       "POST",
@@ -39,6 +60,10 @@ export async function buildApp() {
     },
   });
 
+  await app.register(helmet, {
+    contentSecurityPolicy: false,
+  });
+
   await app.register(fastifyStatic, {
     root: resolve(
       __dirname,
@@ -47,33 +72,38 @@ export async function buildApp() {
     prefix: "/uploads/",
   });
 
-  app.get("/health", async () => ({
-    status: "ok",
-  }));
+  app.decorateRequest(
+    "admin",
+    null,
+  );
 
-  await app.register(articlePublicRoutes, {
-    prefix: "/articles",
-  });
+  app.get(
+    "/health",
+    async () => ({
+      status: "ok",
+    }),
+  );
 
-  await app.register(articleAdminRoutes, {
-    prefix: "/admin/articles",
-  });
+  await app.register(
+    articlePublicRoutes,
+    {
+      prefix: "/articles",
+    },
+  );
 
-  await app.register(categoryRoutes, {
-    prefix: "/admin/categories",
-  });
+  await app.register(
+    authRoutes,
+    {
+      prefix: "/auth",
+    },
+  );
 
-  await app.register(tagRoutes, {
-    prefix: "/admin/tags",
-  });
-
-  await app.register(authorRoutes, {
-    prefix: "/admin/authors",
-  });
-
-  await app.register(mediaRoutes, {
-    prefix: "/admin/media",
-  });
+  await app.register(
+    adminRoutes,
+    {
+      prefix: "/admin",
+    },
+  );
 
   return app;
 }
