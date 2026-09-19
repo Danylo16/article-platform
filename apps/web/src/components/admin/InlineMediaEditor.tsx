@@ -1,3 +1,5 @@
+"use client";
+
 import {
   useMemo,
   useState,
@@ -11,8 +13,6 @@ import {
   getArticleMedia,
   type ArticleMedia,
 } from "../../lib/articleMedia";
-
-import "./InlineMediaEditor.css";
 
 type MediaForm = {
   url: string;

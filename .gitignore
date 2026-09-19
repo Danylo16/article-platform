@@ -18,3 +18,8 @@ node_modules
 
 apps/api/uploads/*
 !apps/api/uploads/.gitkeep
+apps/api/dist/
+
+apps/web/.next/
+apps/web/*.tsbuildinfo
+apps/web/next-env.d.ts

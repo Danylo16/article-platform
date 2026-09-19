@@ -3,8 +3,6 @@ import type { ComponentPropsWithoutRef } from "react";
 import { getMediaUrl } from "../api/media";
 import { parseMediaTitle } from "../lib/articleMedia";
 
-import "./ArticleMarkdownImage.css";
-
 type ArticleMarkdownImageProps = ComponentPropsWithoutRef<"img"> & {
   node?: unknown;
 };
@@ -15,7 +13,7 @@ export function ArticleMarkdownImage({
   title,
 }: ArticleMarkdownImageProps) {
   const metadata = parseMediaTitle(title);
-  const imageUrl = getMediaUrl(src);
+  const imageUrl = getMediaUrl(typeof src === "string" ? src : undefined);
 
   if (!imageUrl) {
     return null;
