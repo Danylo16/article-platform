@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 import {
   createAuthor,
@@ -350,11 +349,10 @@ export function AdminContentPage() {
     <main className="content-admin-shell">
       <header className="content-admin-header">
         <div>
-          <span>CMS</span>
+          <span>Editorial workspace</span>
           <h1>Content data</h1>
           <p>Manage the reusable authors, categories and tags shown in the editor.</p>
         </div>
-        <Link href="/admin/articles">Back to articles</Link>
       </header>
 
       {error && (

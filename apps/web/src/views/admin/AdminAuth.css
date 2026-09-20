@@ -1,49 +1,3 @@
-.admin-area {
-  min-height: 100vh;
-  background: #f8f4ee;
-  color: #102c45;
-}
-
-.admin-session-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  min-height: 58px;
-  padding: 0 32px;
-  border-bottom: 3px solid #91c9de;
-  background: #092b4c;
-  color: #fff;
-}
-
-.admin-session-bar__brand {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 19px;
-  letter-spacing: 0.12em;
-  text-decoration: none;
-}
-
-.admin-session-bar__account {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 13px;
-}
-
-.admin-session-bar__logout {
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  padding: 7px 12px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.admin-session-bar__logout:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-
 .admin-login {
   display: grid;
   place-items: center;
@@ -150,17 +104,6 @@
 }
 
 @media (max-width: 760px) {
-  .admin-session-bar {
-    align-items: flex-start;
-    padding: 14px 18px;
-  }
-
-  .admin-session-bar__account {
-    align-items: flex-end;
-    flex-direction: column;
-    gap: 7px;
-  }
-
   .admin-login {
     padding: 18px;
   }
