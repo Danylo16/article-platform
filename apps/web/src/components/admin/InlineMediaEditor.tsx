@@ -150,8 +150,12 @@ export function InlineMediaEditor({
       setOpen(false);
       setFile(null);
       setEditingRaw(null);
-    } catch {
-      setError("Image upload failed.");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Image upload failed.",
+      );
     } finally {
       setSaving(false);
     }

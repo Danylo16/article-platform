@@ -9,8 +9,79 @@ const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000"
 ).replace(/\/+$/, "");
 
+export type AdminUser = {
+  id: string;
+  email: string;
+};
+
+async function apiFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Response> {
+  const response = await fetch(input, {
+    ...init,
+    credentials: "include",
+  });
+
+  if (
+    response.status === 401 &&
+    typeof window !== "undefined" &&
+    window.location.pathname !== "/admin/login"
+  ) {
+    window.location.assign("/admin/login");
+  }
+
+  return response;
+}
+
+export async function loginAdmin(input: {
+  email: string;
+  password: string;
+}): Promise<AdminUser> {
+  const response = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Invalid email or password");
+    }
+
+    if (response.status === 429) {
+      throw new Error("Too many login attempts. Try again later.");
+    }
+
+    throw new Error("Login failed");
+  }
+
+  const body = (await response.json()) as {
+    user: AdminUser;
+  };
+
+  return body.user;
+}
+
+export async function logoutAdmin(): Promise<void> {
+  const response = await apiFetch(`${API_URL}/auth/logout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: "{}",
+  });
+
+  if (!response.ok) {
+    throw new Error("Logout failed");
+  }
+}
+
 export async function getAdminArticles(): Promise<Article[]> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/articles`,
   );
 
@@ -24,7 +95,7 @@ export async function getAdminArticles(): Promise<Article[]> {
 export async function getAdminArticleById(
   id: string,
 ): Promise<Article> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/articles/${id}`,
   );
 
@@ -45,7 +116,7 @@ export async function createArticle(input: {
   categoryId?: string;
   tagIds: string[];
 }): Promise<Article> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/articles`,
     {
       method: "POST",
@@ -76,7 +147,7 @@ export async function updateArticle(
     tagIds: string[];
   }>,
 ): Promise<Article> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/articles/${id}`,
     {
       method: "PATCH",
@@ -97,7 +168,7 @@ export async function updateArticle(
 export async function publishArticle(
   id: string,
 ): Promise<Article> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/articles/${id}/publish`,
     {
       method: "POST",
@@ -118,7 +189,7 @@ export async function publishArticle(
 export async function unpublishArticle(
   id: string,
 ): Promise<Article> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/articles/${id}/unpublish`,
     {
       method: "POST",
@@ -139,7 +210,7 @@ export async function unpublishArticle(
 export async function deleteArticle(
   id: string,
 ): Promise<void> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/articles/${id}`,
     {
       method: "DELETE",
@@ -152,7 +223,7 @@ export async function deleteArticle(
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/categories`,
   );
 
@@ -164,7 +235,7 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function createCategory(name: string): Promise<Category> {
-  const response = await fetch(`${API_URL}/admin/categories`, {
+  const response = await apiFetch(`${API_URL}/admin/categories`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -183,7 +254,7 @@ export async function updateCategory(
   id: string,
   name: string,
 ): Promise<Category> {
-  const response = await fetch(`${API_URL}/admin/categories/${id}`, {
+  const response = await apiFetch(`${API_URL}/admin/categories/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -199,7 +270,7 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(id: string): Promise<void> {
-  const response = await fetch(`${API_URL}/admin/categories/${id}`, {
+  const response = await apiFetch(`${API_URL}/admin/categories/${id}`, {
     method: "DELETE",
   });
 
@@ -209,7 +280,7 @@ export async function deleteCategory(id: string): Promise<void> {
 }
 
 export async function getAuthors(): Promise<Author[]> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/authors`,
   );
 
@@ -225,7 +296,7 @@ export async function createAuthor(input: {
   bio?: string | null;
   avatarUrl?: string | null;
 }): Promise<Author> {
-  const response = await fetch(`${API_URL}/admin/authors`, {
+  const response = await apiFetch(`${API_URL}/admin/authors`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -248,7 +319,7 @@ export async function updateAuthor(
     avatarUrl?: string | null;
   },
 ): Promise<Author> {
-  const response = await fetch(`${API_URL}/admin/authors/${id}`, {
+  const response = await apiFetch(`${API_URL}/admin/authors/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -264,7 +335,7 @@ export async function updateAuthor(
 }
 
 export async function deleteAuthor(id: string): Promise<void> {
-  const response = await fetch(`${API_URL}/admin/authors/${id}`, {
+  const response = await apiFetch(`${API_URL}/admin/authors/${id}`, {
     method: "DELETE",
   });
 
@@ -274,7 +345,7 @@ export async function deleteAuthor(id: string): Promise<void> {
 }
 
 export async function getTags(): Promise<Tag[]> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/tags`,
   );
 
@@ -286,7 +357,7 @@ export async function getTags(): Promise<Tag[]> {
 }
 
 export async function createTag(name: string): Promise<Tag> {
-  const response = await fetch(`${API_URL}/admin/tags`, {
+  const response = await apiFetch(`${API_URL}/admin/tags`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -305,7 +376,7 @@ export async function updateTag(
   id: string,
   name: string,
 ): Promise<Tag> {
-  const response = await fetch(`${API_URL}/admin/tags/${id}`, {
+  const response = await apiFetch(`${API_URL}/admin/tags/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -321,7 +392,7 @@ export async function updateTag(
 }
 
 export async function deleteTag(id: string): Promise<void> {
-  const response = await fetch(`${API_URL}/admin/tags/${id}`, {
+  const response = await apiFetch(`${API_URL}/admin/tags/${id}`, {
     method: "DELETE",
   });
 
@@ -338,11 +409,25 @@ export async function uploadMedia(
   mimeType: string;
   size: number;
 }> {
+  const allowedTypes = new Set([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+  ]);
+
+  if (!allowedTypes.has(file.type)) {
+    throw new Error("Only JPEG, PNG and WebP images are supported");
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error("The image must be smaller than 10 MB");
+  }
+
   const formData = new FormData();
 
   formData.append("file", file);
 
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/admin/media`,
     {
       method: "POST",
@@ -351,7 +436,19 @@ export async function uploadMedia(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to upload media");
+    if (response.status === 401) {
+      throw new Error("Your session expired. Sign in again");
+    }
+
+    if (response.status === 413) {
+      throw new Error("The image must be smaller than 10 MB");
+    }
+
+    if (response.status === 415) {
+      throw new Error("Only JPEG, PNG and WebP images are supported");
+    }
+
+    throw new Error(`Image upload failed (${response.status})`);
   }
 
   return response.json();

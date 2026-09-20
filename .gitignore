@@ -18,7 +18,17 @@ node_modules
 
 apps/api/uploads/*
 !apps/api/uploads/.gitkeep
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Build output
 apps/api/dist/
+
+# Generated Prisma client
+apps/api/src/generated/prisma/
 
 apps/web/.next/
 apps/web/*.tsbuildinfo

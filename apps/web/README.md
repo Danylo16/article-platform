@@ -20,6 +20,10 @@ Copy `.env.example` to `.env.local` only when the defaults need to change.
 - `NEXT_PUBLIC_API_URL` is used by the browser-based CMS and media URLs.
 - `NEXT_PUBLIC_SITE_URL` is used for canonical URLs and metadata routes.
 
+The CMS uses the Fastify session cookie. Browser API requests include
+credentials, and protected Next.js admin routes validate the same session
+server-side before rendering.
+
 ## Verification
 
 ```powershell

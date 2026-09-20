@@ -7,6 +7,7 @@ import "../components/ArticleMarkdownImage.css";
 import "../components/admin/InlineMediaEditor.css";
 import "../views/admin/AdminArticleEditorPage.css";
 import "../views/admin/AdminContentPage.css";
+import "../views/admin/AdminAuth.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:5173";
 

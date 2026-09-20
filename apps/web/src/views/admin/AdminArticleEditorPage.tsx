@@ -229,9 +229,11 @@ export function AdminArticleEditorPage() {
         "coverImage",
         uploaded.url,
       );
-    } catch {
+    } catch (uploadError) {
       setError(
-        "Failed to upload cover image",
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Failed to upload cover image",
       );
     } finally {
       setUploadingCover(false);
