@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import "../index.css";
 import "../views/HomePage.css";
+import "../views/ArticlePage.css";
 import "../components/ArticleMarkdownImage.css";
 import "../components/admin/InlineMediaEditor.css";
 import "../views/admin/AdminArticleEditorPage.css";

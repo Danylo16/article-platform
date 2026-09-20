@@ -6,6 +6,7 @@ import type {
   CreateArticleInput,
   UpdateArticleInput,
 } from "./article.schema.js";
+import { calculateReadingTime } from "./article.reading-time.js";
 
 export async function getAllArticles() {
   return prisma.article.findMany({
@@ -112,6 +113,7 @@ export async function createArticle(
       excerpt: input.excerpt,
       content: input.content,
       coverImage: input.coverImage,
+      readingTime: calculateReadingTime(input.content),
 
       slug,
 
@@ -160,6 +162,10 @@ export async function updateArticle(
     data: {
       ...articleData,
 
+      ...(input.content !== undefined
+        ? { readingTime: calculateReadingTime(input.content) }
+        : {}),
+
       ...(tagIds !== undefined
         ? {
             tags: {
@@ -190,6 +196,11 @@ export async function updateArticle(
 }
 
 export async function publishArticle(id: string) {
+  const article = await prisma.article.findUniqueOrThrow({
+    where: { id },
+    select: { content: true },
+  });
+
   return prisma.article.update({
     where: {
       id,
@@ -198,6 +209,7 @@ export async function publishArticle(id: string) {
     data: {
       status: "PUBLISHED",
       publishedAt: new Date(),
+      readingTime: calculateReadingTime(article.content),
     },
 
     include: {

@@ -33,7 +33,9 @@ export async function generateMetadata({
       title: article.title,
       description,
       publishedTime: article.publishedAt ?? undefined,
+      modifiedTime: article.updatedAt,
       authors: [article.author.name],
+      tags: article.tags.map(({ tag }) => tag.name),
       images: coverImage ? [{ url: coverImage }] : undefined,
     },
   };
