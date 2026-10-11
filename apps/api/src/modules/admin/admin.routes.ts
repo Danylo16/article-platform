@@ -5,6 +5,10 @@ import categoryRoutes from "../categories/category.routes.js";
 import tagRoutes from "../tags/tag.routes.js";
 import authorRoutes from "../authors/author.routes.js";
 import mediaRoutes from "../media/media.routes.js";
+import placeAdminRoutes from "../places/place.admin.routes.js";
+import locationTypeRoutes from "../location-types/location-type.routes.js";
+import geocodingRoutes from "../geocoding/geocoding.routes.js";
+import sectionAdminRoutes from "../sections/section.admin.routes.js";
 
 import {
   requireAdmin,
@@ -42,5 +46,21 @@ export default async function adminRoutes(
 
   await app.register(mediaRoutes, {
     prefix: "/media",
+  });
+
+  await app.register(placeAdminRoutes, {
+    prefix: "/places",
+  });
+
+  await app.register(locationTypeRoutes, {
+    prefix: "/location-types",
+  });
+
+  await app.register(geocodingRoutes, {
+    prefix: "/geocoding",
+  });
+
+  await app.register(sectionAdminRoutes, {
+    prefix: "/sections",
   });
 }

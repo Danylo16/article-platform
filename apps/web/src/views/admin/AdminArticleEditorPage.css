@@ -169,6 +169,12 @@
   resize: vertical;
 }
 
+.form-field__hint {
+  color: #868e96;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .tags-block {
   margin-top: 24px;
 }

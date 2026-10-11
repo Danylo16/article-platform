@@ -1,17 +1,7 @@
 import { getPublishedArticles } from "../api/server";
 import { HomePage } from "../views/HomePage";
 
-type HomeRouteProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-export default async function HomeRoute({ searchParams }: HomeRouteProps) {
-  const resolvedSearchParams = await searchParams;
-  const categoryParam = resolvedSearchParams.category;
-  const selectedCategory = Array.isArray(categoryParam)
-    ? categoryParam[0] ?? null
-    : categoryParam ?? null;
-
+export default async function HomeRoute() {
   let articles: Awaited<ReturnType<typeof getPublishedArticles>> = [];
   let loadError = false;
 
@@ -24,7 +14,6 @@ export default async function HomeRoute({ searchParams }: HomeRouteProps) {
   return (
     <HomePage
       articles={articles}
-      selectedCategory={selectedCategory}
       loadError={loadError}
     />
   );

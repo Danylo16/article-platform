@@ -109,12 +109,12 @@ export function InlineMediaEditor({
 
   async function saveMedia() {
     if (!form.alt.trim()) {
-      setError("Alt text is required.");
+      setError("Альтернативний текст обов’язковий.");
       return;
     }
 
     if (!file && !form.url) {
-      setError("Choose an image.");
+      setError("Виберіть зображення.");
       return;
     }
 
@@ -134,7 +134,7 @@ export function InlineMediaEditor({
         const currentStart = content.indexOf(editingRaw);
 
         if (currentStart === -1) {
-          setError("The image block changed. Close the editor and try again.");
+          setError("Блок зображення змінився. Закрийте редактор і спробуйте ще раз.");
           return;
         }
 
@@ -154,7 +154,7 @@ export function InlineMediaEditor({
       setError(
         uploadError instanceof Error
           ? uploadError.message
-          : "Image upload failed.",
+          : "Не вдалося завантажити зображення.",
       );
     } finally {
       setSaving(false);
@@ -162,7 +162,7 @@ export function InlineMediaEditor({
   }
 
   function removeMedia(item: ArticleMedia) {
-    if (!window.confirm(`Remove image "${item.alt || item.url}" from the article?`)) {
+    if (!window.confirm(`Прибрати зображення «${item.alt || item.url}» зі статті?`)) {
       return;
     }
 
@@ -180,8 +180,8 @@ export function InlineMediaEditor({
     <div className="inline-media-editor">
       <div className="inline-media-editor__toolbar">
         <div>
-          <strong>Article images</strong>
-          <span>{media.length} in content</span>
+          <strong>Зображення у статті</strong>
+          <span>У тексті: {media.length}</span>
         </div>
 
         <button
@@ -189,7 +189,7 @@ export function InlineMediaEditor({
           type="button"
           onClick={openNewMedia}
         >
-          Add image at cursor
+          Додати в позицію курсора
         </button>
       </div>
 
@@ -203,22 +203,22 @@ export function InlineMediaEditor({
               <img src={getMediaUrl(item.url) ?? ""} alt="" />
 
               <div>
-                <strong>{item.alt || `Image ${index + 1}`}</strong>
+                <strong>{item.alt || `Зображення ${index + 1}`}</strong>
                 <span>
                   {[item.caption, item.credit].filter(Boolean).join(" · ") ||
-                    "No caption or credit"}
+                    "Без підпису й авторства"}
                 </span>
               </div>
 
               <button type="button" onClick={() => openExistingMedia(item)}>
-                Edit
+                Редагувати
               </button>
               <button
                 className="inline-media-editor__remove"
                 type="button"
                 onClick={() => removeMedia(item)}
               >
-                Remove
+                Прибрати
               </button>
             </div>
           ))}
@@ -228,8 +228,8 @@ export function InlineMediaEditor({
       {open && (
         <div className="inline-media-editor__form">
           <div className="inline-media-editor__form-heading">
-            <strong>{editingRaw ? "Edit article image" : "Insert article image"}</strong>
-            <button type="button" onClick={closeEditor} aria-label="Close image editor">
+            <strong>{editingRaw ? "Редагувати зображення" : "Вставити зображення"}</strong>
+            <button type="button" onClick={closeEditor} aria-label="Закрити редактор зображення">
               ×
             </button>
           </div>
@@ -243,7 +243,7 @@ export function InlineMediaEditor({
           )}
 
           <label>
-            <span>{editingRaw ? "Replace image (optional)" : "Image"}</span>
+            <span>{editingRaw ? "Замінити файл (необов’язково)" : "Зображення"}</span>
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
@@ -254,34 +254,34 @@ export function InlineMediaEditor({
           {file && <p className="inline-media-editor__file">{file.name}</p>}
 
           <label>
-            <span>Alt text *</span>
+            <span>Альтернативний текст *</span>
             <input
               type="text"
               value={form.alt}
               maxLength={240}
-              placeholder="Describe what is visible in the image"
+              placeholder="Опишіть, що зображено на фото"
               onChange={(event) => updateField("alt", event.target.value)}
             />
           </label>
 
           <label>
-            <span>Caption</span>
+            <span>Підпис</span>
             <input
               type="text"
               value={form.caption}
               maxLength={500}
-              placeholder="Optional context shown below the image"
+              placeholder="Контекст, який буде показано під зображенням"
               onChange={(event) => updateField("caption", event.target.value)}
             />
           </label>
 
           <label>
-            <span>Credit</span>
+            <span>Авторство</span>
             <input
               type="text"
               value={form.credit}
               maxLength={240}
-              placeholder="Photographer or source"
+              placeholder="Фотограф або джерело"
               onChange={(event) => updateField("credit", event.target.value)}
             />
           </label>
@@ -295,7 +295,7 @@ export function InlineMediaEditor({
               onClick={closeEditor}
               disabled={saving}
             >
-              Cancel
+              Скасувати
             </button>
             <button
               className="button button-primary"
@@ -304,10 +304,10 @@ export function InlineMediaEditor({
               disabled={saving}
             >
               {saving
-                ? "Uploading..."
+                ? "Завантажуємо…"
                 : editingRaw
-                  ? "Update image"
-                  : "Upload and insert"}
+                  ? "Оновити зображення"
+                  : "Завантажити й вставити"}
             </button>
           </div>
         </div>

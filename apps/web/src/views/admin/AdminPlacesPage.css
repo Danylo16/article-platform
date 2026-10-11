@@ -1,0 +1,421 @@
+.places-admin-shell {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 54px 0 90px;
+  color: var(--admin-ink);
+}
+
+.places-types-section,
+.places-admin-create {
+  margin-bottom: 28px;
+}
+
+.places-types-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.places-type-card {
+  padding: 18px;
+  border: 1px solid var(--admin-line);
+  background: #0f1520;
+  color: #f5f7fb;
+}
+
+.places-type-card__header {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.places-type-card__icon,
+.places-admin-card__icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 11px;
+  background: #4169e1;
+  color: #fff;
+}
+
+.places-type-card__icon svg,
+.places-admin-card__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.places-type-card__header > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.places-type-card__header code,
+.places-type-card__header > span:last-child {
+  color: #8290a8;
+  font-size: 11px;
+}
+
+.places-type-card__fields,
+.places-type-create__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px;
+  gap: 12px;
+}
+
+.places-type-card label,
+.places-type-create label,
+.places-admin-fields label,
+.places-coordinates label {
+  display: grid;
+  gap: 6px;
+}
+
+.places-type-card label > span,
+.places-type-create label > span,
+.places-admin-fields label > span,
+.places-address-field label > span,
+.places-coordinates label > span {
+  color: #8f9db2;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.places-type-card input,
+.places-type-create input,
+.places-admin-fields input,
+.places-admin-fields select,
+.places-coordinates input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid #ced4da;
+  background: #fff;
+  color: #18202c;
+  font: inherit;
+  font-size: 14px;
+}
+
+.places-type-card input {
+  border-color: #2a3444;
+  background: #151d29;
+  color: #f5f7fb;
+}
+
+.places-icon-picker {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.places-icon-picker button {
+  display: grid;
+  min-width: 0;
+  min-height: 48px;
+  place-items: center;
+  border: 1px solid #2a3444;
+  border-radius: 8px;
+  background: #151d29;
+  color: #91a0b6;
+  cursor: pointer;
+}
+
+.places-icon-picker button:hover,
+.places-icon-picker button:focus-visible,
+.places-icon-picker button.is-active {
+  border-color: #7391ff;
+  background: #1b2945;
+  color: #dfe7ff;
+}
+
+.places-icon-picker svg {
+  width: 21px;
+  height: 21px;
+}
+
+.places-icon-picker span {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(0, 0, 0, 0);
+}
+
+.places-type-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.places-type-card__actions .places-admin-visible {
+  margin-right: auto;
+}
+
+.places-type-card__actions .places-admin-visible span {
+  color: #a8b3c5;
+  text-transform: none;
+}
+
+.places-type-create {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px dashed var(--admin-line);
+  background: #f6f8fb;
+}
+
+.places-type-create .places-icon-picker {
+  grid-template-columns: repeat(8, 48px);
+}
+
+.places-type-create .places-icon-picker button {
+  border-color: #d7dce4;
+  background: #fff;
+  color: #536072;
+}
+
+.places-type-create .places-icon-picker button.is-active {
+  border-color: #4169e1;
+  background: #e8edff;
+  color: #244fc7;
+}
+
+.places-type-create > .content-admin-button,
+.places-admin-create > .content-admin-button {
+  margin-top: 14px;
+}
+
+.places-admin-fields {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 0.6fr);
+  gap: 14px;
+}
+
+.places-address-field {
+  grid-column: 1 / -1;
+}
+
+.places-address-field__control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.places-address-field__control input {
+  border-right: 0;
+}
+
+.places-address-field__control button {
+  padding: 0 18px;
+  border: 1px solid #4169e1;
+  background: #4169e1;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.places-address-field__control button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.places-address-field__success {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 9px 0 0;
+  color: #16824f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.places-address-field__success span {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 50%;
+  background: #dff5e9;
+}
+
+.places-coordinates {
+  margin-top: 10px;
+}
+
+.places-coordinates summary {
+  color: var(--admin-muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.places-coordinates > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 180px));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.places-admin-visible {
+  display: flex !important;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 9px !important;
+}
+
+.places-admin-visible input {
+  width: auto;
+  accent-color: #4169e1;
+}
+
+.places-admin-visible span {
+  color: #495057;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.places-admin-list {
+  display: grid;
+  gap: 18px;
+}
+
+.places-admin-list__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0 2px;
+}
+
+.places-admin-list__heading h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.places-admin-list__heading span {
+  display: grid;
+  min-width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 8px;
+  background: #e8edff;
+  color: #244fc7;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.places-admin-card {
+  padding: 22px;
+  border: 1px solid var(--admin-line);
+  background: var(--admin-paper);
+}
+
+.places-admin-card__heading {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.places-admin-card__heading > div:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.places-admin-card__heading > div:nth-child(2) span {
+  overflow: hidden;
+  color: var(--admin-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.places-admin-card__meta {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
+.places-admin-card__meta code {
+  overflow: hidden;
+  max-width: 220px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.places-admin-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+@media (max-width: 1000px) {
+  .places-types-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .places-admin-shell {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .places-icon-picker {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .places-type-create .places-icon-picker {
+    grid-template-columns: repeat(4, 48px);
+  }
+}
+
+@media (max-width: 620px) {
+  .places-admin-fields,
+  .places-type-card__fields,
+  .places-type-create__fields {
+    grid-template-columns: 1fr;
+  }
+
+  .places-address-field__control {
+    grid-template-columns: 1fr;
+  }
+
+  .places-address-field__control input {
+    border-right: 1px solid #ced4da;
+  }
+
+  .places-address-field__control button {
+    min-height: 42px;
+  }
+
+  .places-admin-card__heading {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .places-admin-card__meta {
+    grid-column: 1 / -1;
+    justify-items: start;
+  }
+
+  .places-type-card__actions {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .places-type-card__actions .places-admin-visible {
+    flex-basis: 100%;
+  }
+}

@@ -1,131 +1,23 @@
 import Link from "next/link";
 
-import { getMediaUrl } from "../api/media";
+import {
+  ArticleCover,
+  ArticleMeta,
+  StoryCard,
+} from "../components/public/ArticleCard";
+import {
+  PublicSiteFooter,
+  PublicSiteHeader,
+} from "../components/public/PublicSiteChrome";
 import type { Article } from "../types/article";
-
-const PUBLICATION = {
-  name: "DORIDA",
-  strapline: "Journal aus Wien",
-  description:
-    "Geschichten über Menschen, Kultur und Politik – nah an Wien und mit Blick in die Tiefe.",
-} as const;
-
-function formatDate(value: string | null) {
-  if (!value) {
-    return null;
-  }
-
-  return new Intl.DateTimeFormat("de-AT", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
-function getFallbackTone(article: Article) {
-  const hash = [...article.slug].reduce(
-    (total, character) => total + character.charCodeAt(0),
-    0,
-  );
-
-  return (hash % 3) + 1;
-}
-
-function ArticleMeta({ article }: { article: Article }) {
-  const publishedAt = formatDate(article.publishedAt);
-
-  return (
-    <div className="article-meta">
-      <span>Von {article.author.name}</span>
-
-      {publishedAt && (
-        <>
-          <span className="article-meta__dot" aria-hidden="true" />
-          <time dateTime={article.publishedAt ?? undefined}>{publishedAt}</time>
-        </>
-      )}
-
-      {article.readingTime && article.readingTime > 0 ? (
-        <>
-          <span className="article-meta__dot" aria-hidden="true" />
-          <span>{article.readingTime} Min.</span>
-        </>
-      ) : null}
-    </div>
-  );
-}
-
-function ArticleCover({
-  article,
-  eager = false,
-}: {
-  article: Article;
-  eager?: boolean;
-}) {
-  const coverUrl = getMediaUrl(article.coverImage);
-
-  if (coverUrl) {
-    return (
-      <img
-        className="article-cover__image"
-        src={coverUrl}
-        alt=""
-        loading={eager ? "eager" : "lazy"}
-        fetchPriority={eager ? "high" : "auto"}
-      />
-    );
-  }
-
-  return (
-    <div
-      className={`article-cover__fallback article-cover__fallback--${getFallbackTone(article)}`}
-      aria-hidden="true"
-    >
-      <span>{article.category?.name ?? "Wien"}</span>
-      <strong>DORIDA</strong>
-    </div>
-  );
-}
-
-function StoryCard({ article }: { article: Article }) {
-  const summary = article.excerpt ?? article.subtitle;
-
-  return (
-    <article className="story-card">
-      <Link
-        className="story-card__cover article-cover"
-        href={`/articles/${article.slug}`}
-        aria-label={`${article.title} lesen`}
-      >
-        <ArticleCover article={article} />
-      </Link>
-
-      <div className="story-card__content">
-        <p className="eyebrow">
-          {article.category?.name ?? "Reportage"}
-        </p>
-
-        <h3>
-          <Link href={`/articles/${article.slug}`}>{article.title}</Link>
-        </h3>
-
-        {summary && <p className="story-card__summary">{summary}</p>}
-
-        <ArticleMeta article={article} />
-      </div>
-    </article>
-  );
-}
 
 type HomePageProps = {
   articles: Article[];
-  selectedCategory: string | null;
   loadError?: boolean;
 };
 
 export function HomePage({
   articles,
-  selectedCategory,
   loadError = false,
 }: HomePageProps) {
   const orderedArticles = [...articles].sort((first, second) => {
@@ -139,48 +31,12 @@ export function HomePage({
     return secondDate - firstDate;
   });
 
-  const uniqueCategories = new Map(
-    orderedArticles
-      .filter((article) => article.category)
-      .map((article) => [article.category!.slug, article.category!]),
-  );
-  const categories = [...uniqueCategories.values()].slice(0, 6);
-  const visibleArticles = selectedCategory
-    ? orderedArticles.filter(
-        (article) => article.category?.slug === selectedCategory,
-      )
-    : orderedArticles;
-  const leadArticle = visibleArticles[0];
-  const secondaryArticles = visibleArticles.slice(1);
+  const leadArticle = orderedArticles[0];
+  const secondaryArticles = orderedArticles.slice(1);
 
   return (
     <div className="home-page">
-      <header className="site-header">
-        <div className="site-header__inner">
-          <Link className="site-header__brand" href="/" aria-label="DORIDA Startseite">
-            <strong>{PUBLICATION.name}</strong>
-            <span>{PUBLICATION.strapline}</span>
-          </Link>
-
-          <nav className="site-header__nav" aria-label="Hauptnavigation">
-            <Link href="/" aria-current={!selectedCategory ? "page" : undefined}>
-              Neueste
-            </Link>
-
-            {categories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/?category=${category.slug}`}
-                aria-current={
-                  selectedCategory === category.slug ? "page" : undefined
-                }
-              >
-                {category.name}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </header>
+      <PublicSiteHeader />
 
       <main className="home-page__main">
         {loadError && (
@@ -197,22 +53,8 @@ export function HomePage({
         {!loadError && !leadArticle && (
           <section className="homepage-message">
             <p className="eyebrow">DORIDA Redaktion</p>
-            <h1>
-              {selectedCategory
-                ? "In dieser Rubrik gibt es noch keine Artikel."
-                : "Die erste Geschichte ist unterwegs."}
-            </h1>
-            <p>
-              {selectedCategory
-                ? "Entdecken Sie stattdessen unsere neuesten Geschichten."
-                : "Veröffentlichte Artikel erscheinen hier."}
-            </p>
-
-            {selectedCategory && (
-              <Link className="homepage-message__link" href="/">
-                Alle Geschichten
-              </Link>
-            )}
+            <h1>Die erste Geschichte ist unterwegs.</h1>
+            <p>Veröffentlichte Artikel erscheinen hier.</p>
           </section>
         )}
 
@@ -231,7 +73,13 @@ export function HomePage({
                 <p className="eyebrow">
                   Wien
                   <span aria-hidden="true">·</span>
-                  {leadArticle.category?.name ?? "Reportage"}
+                  {leadArticle.section.name}
+                  {leadArticle.category && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      {leadArticle.category.name}
+                    </>
+                  )}
                 </p>
 
                 <h1>
@@ -274,15 +122,7 @@ export function HomePage({
         )}
       </main>
 
-      <footer className="site-footer">
-        <div>
-          <strong>{PUBLICATION.name}</strong>
-          <span>{PUBLICATION.strapline}</span>
-        </div>
-
-        <p>{PUBLICATION.description}</p>
-        <small>© {new Date().getFullYear()} DORIDA</small>
-      </footer>
+      <PublicSiteFooter />
     </div>
   );
 }

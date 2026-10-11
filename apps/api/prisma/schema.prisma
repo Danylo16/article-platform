@@ -44,8 +44,14 @@ model Article {
   authorId String
   author   Author @relation(fields: [authorId], references: [id])
 
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id])
+
+  placeId String?
+  place   Place? @relation(fields: [placeId], references: [id], onDelete: SetNull)
 
   tags ArticleTag[]
 
@@ -54,7 +60,59 @@ model Article {
 
   @@index([status])
   @@index([publishedAt])
+  @@index([sectionId])
   @@index([categoryId])
+  @@index([placeId])
+}
+
+model Place {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  typeId    String
+  type      LocationType @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  address   String
+  latitude  Float
+  longitude Float
+  isVisible Boolean   @default(true)
+
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([typeId, isVisible])
+}
+
+model LocationType {
+  id              String  @id @default(uuid())
+  name            String
+  slug            String  @unique
+  icon             String
+  navigationOrder Int
+  isVisible       Boolean @default(true)
+
+  places Place[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isVisible, navigationOrder])
+}
+
+model Section {
+  id              String  @id @default(uuid())
+  name            String  @unique
+  slug            String  @unique
+  navigationOrder Int
+  isVisible       Boolean @default(true)
+
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isVisible, navigationOrder])
 }
 
 model Category {

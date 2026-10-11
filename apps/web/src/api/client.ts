@@ -2,6 +2,10 @@ import type {
   Article,
   Author,
   Category,
+  LocationType,
+  Place,
+  PlaceIconName,
+  Section,
   Tag,
 } from "../types/article";
 
@@ -49,14 +53,14 @@ export async function loginAdmin(input: {
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error("Invalid email or password");
+      throw new Error("Неправильна електронна пошта або пароль");
     }
 
     if (response.status === 429) {
-      throw new Error("Too many login attempts. Try again later.");
+      throw new Error("Забагато спроб входу. Спробуйте пізніше.");
     }
 
-    throw new Error("Login failed");
+    throw new Error("Не вдалося увійти");
   }
 
   const body = (await response.json()) as {
@@ -76,7 +80,7 @@ export async function logoutAdmin(): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error("Logout failed");
+    throw new Error("Не вдалося вийти із системи");
   }
 }
 
@@ -86,7 +90,7 @@ export async function getAdminArticles(): Promise<Article[]> {
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch admin articles");
+    throw new Error("Не вдалося завантажити статті");
   }
 
   return response.json();
@@ -100,7 +104,7 @@ export async function getAdminArticleById(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch article");
+    throw new Error("Не вдалося завантажити статтю");
   }
 
   return response.json();
@@ -113,7 +117,9 @@ export async function createArticle(input: {
   content: string;
   coverImage?: string;
   authorId: string;
+  sectionId: string;
   categoryId?: string;
+  placeId?: string;
   tagIds: string[];
 }): Promise<Article> {
   const response = await apiFetch(
@@ -128,7 +134,7 @@ export async function createArticle(input: {
   );
 
   if (!response.ok) {
-    throw new Error("Failed to create article");
+    throw new Error("Не вдалося створити статтю");
   }
 
   return response.json();
@@ -143,7 +149,9 @@ export async function updateArticle(
     content: string;
     coverImage: string | null;
     authorId: string;
+    sectionId: string;
     categoryId: string | null;
+    placeId: string | null;
     tagIds: string[];
   }>,
 ): Promise<Article> {
@@ -159,7 +167,7 @@ export async function updateArticle(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to update article");
+    throw new Error("Не вдалося зберегти статтю");
   }
 
   return response.json();
@@ -180,7 +188,7 @@ export async function publishArticle(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to publish article");
+    throw new Error("Не вдалося опублікувати статтю");
   }
 
   return response.json();
@@ -201,7 +209,7 @@ export async function unpublishArticle(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to unpublish article");
+    throw new Error("Не вдалося зняти статтю з публікації");
   }
 
   return response.json();
@@ -218,7 +226,7 @@ export async function deleteArticle(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to delete article");
+    throw new Error("Не вдалося видалити статтю");
   }
 }
 
@@ -228,10 +236,229 @@ export async function getCategories(): Promise<Category[]> {
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch categories");
+    throw new Error("Не вдалося завантажити рубрики");
   }
 
   return response.json();
+}
+
+export async function getSections(): Promise<Section[]> {
+  const response = await apiFetch(`${API_URL}/admin/sections`);
+
+  if (!response.ok) {
+    throw new Error("Не вдалося завантажити розділи");
+  }
+
+  return response.json();
+}
+
+export async function updateSection(
+  id: string,
+  input: Partial<{
+    name: string;
+    navigationOrder: number;
+    isVisible: boolean;
+  }>,
+): Promise<Section> {
+  const response = await apiFetch(`${API_URL}/admin/sections/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new Error("Не вдалося оновити розділ");
+  }
+
+  return response.json();
+}
+
+export async function getLocationTypes(): Promise<LocationType[]> {
+  const response = await apiFetch(`${API_URL}/admin/location-types`);
+
+  if (!response.ok) {
+    throw new Error("Не вдалося завантажити типи місць");
+  }
+
+  return response.json();
+}
+
+export async function createLocationType(input: {
+  name: string;
+  icon: PlaceIconName;
+  navigationOrder: number;
+  isVisible: boolean;
+}): Promise<LocationType> {
+  const response = await apiFetch(`${API_URL}/admin/location-types`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    if (response.status === 409) {
+      throw new Error("Тип місця з такою назвою вже існує");
+    }
+
+    throw new Error("Не вдалося створити тип місця");
+  }
+
+  return response.json();
+}
+
+export async function updateLocationType(
+  id: string,
+  input: Partial<{
+    name: string;
+    icon: PlaceIconName;
+    navigationOrder: number;
+    isVisible: boolean;
+  }>,
+): Promise<LocationType> {
+  const response = await apiFetch(`${API_URL}/admin/location-types/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    if (response.status === 409) {
+      throw new Error("Тип місця з такою назвою вже існує");
+    }
+
+    throw new Error("Не вдалося оновити тип місця");
+  }
+
+  return response.json();
+}
+
+export async function deleteLocationType(id: string): Promise<void> {
+  const response = await apiFetch(`${API_URL}/admin/location-types/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    if (response.status === 409) {
+      throw new Error("Спочатку призначте місцям інший тип");
+    }
+
+    throw new Error("Не вдалося видалити тип місця");
+  }
+}
+
+export async function geocodeAddress(address: string): Promise<{
+  address: string;
+  latitude: number;
+  longitude: number;
+}> {
+  const response = await apiFetch(`${API_URL}/admin/geocoding/address`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ address }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Адресу не знайдено. Уточніть вулицю, номер і місто");
+    }
+
+    if (response.status === 429) {
+      throw new Error("Зачекайте секунду перед наступним пошуком");
+    }
+
+    throw new Error("Сервіс пошуку адрес тимчасово недоступний");
+  }
+
+  return response.json();
+}
+
+export async function getPlaces(): Promise<Place[]> {
+  const response = await apiFetch(`${API_URL}/admin/places`);
+
+  if (!response.ok) {
+    throw new Error("Не вдалося завантажити місця");
+  }
+
+  return response.json();
+}
+
+export async function createPlace(input: {
+  name: string;
+  typeId: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  isVisible: boolean;
+}): Promise<Place> {
+  const response = await apiFetch(`${API_URL}/admin/places`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    if (response.status === 409) {
+      throw new Error("Місце з такою назвою вже існує");
+    }
+
+    throw new Error("Не вдалося створити місце");
+  }
+
+  return response.json();
+}
+
+export async function updatePlace(
+  id: string,
+  input: Partial<{
+    name: string;
+    typeId: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    isVisible: boolean;
+  }>,
+): Promise<Place> {
+  const response = await apiFetch(`${API_URL}/admin/places/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    if (response.status === 409) {
+      throw new Error("Місце з такою назвою вже існує");
+    }
+
+    throw new Error("Не вдалося оновити місце");
+  }
+
+  return response.json();
+}
+
+export async function deletePlace(id: string): Promise<void> {
+  const response = await apiFetch(`${API_URL}/admin/places/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    if (response.status === 409) {
+      throw new Error("Спочатку відв’яжіть місце від усіх статей");
+    }
+
+    throw new Error("Не вдалося видалити місце");
+  }
 }
 
 export async function createCategory(name: string): Promise<Category> {
@@ -244,7 +471,7 @@ export async function createCategory(name: string): Promise<Category> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create category");
+    throw new Error("Не вдалося створити рубрику");
   }
 
   return response.json();
@@ -263,7 +490,7 @@ export async function updateCategory(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to update category");
+    throw new Error("Не вдалося оновити рубрику");
   }
 
   return response.json();
@@ -275,7 +502,7 @@ export async function deleteCategory(id: string): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error("Category is still used by articles");
+    throw new Error("Рубрика все ще використовується у статтях");
   }
 }
 
@@ -285,7 +512,7 @@ export async function getAuthors(): Promise<Author[]> {
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch authors");
+    throw new Error("Не вдалося завантажити авторів");
   }
 
   return response.json();
@@ -305,7 +532,7 @@ export async function createAuthor(input: {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create author");
+    throw new Error("Не вдалося створити автора");
   }
 
   return response.json();
@@ -328,7 +555,7 @@ export async function updateAuthor(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to update author");
+    throw new Error("Не вдалося оновити автора");
   }
 
   return response.json();
@@ -340,7 +567,7 @@ export async function deleteAuthor(id: string): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error("Author is still assigned to articles");
+    throw new Error("Автор усе ще прив’язаний до статей");
   }
 }
 
@@ -350,7 +577,7 @@ export async function getTags(): Promise<Tag[]> {
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch tags");
+    throw new Error("Не вдалося завантажити теги");
   }
 
   return response.json();
@@ -366,7 +593,7 @@ export async function createTag(name: string): Promise<Tag> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create tag");
+    throw new Error("Не вдалося створити тег");
   }
 
   return response.json();
@@ -385,7 +612,7 @@ export async function updateTag(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to update tag");
+    throw new Error("Не вдалося оновити тег");
   }
 
   return response.json();
@@ -397,7 +624,7 @@ export async function deleteTag(id: string): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error("Tag is still used by articles");
+    throw new Error("Тег усе ще використовується у статтях");
   }
 }
 
@@ -416,11 +643,11 @@ export async function uploadMedia(
   ]);
 
   if (!allowedTypes.has(file.type)) {
-    throw new Error("Only JPEG, PNG and WebP images are supported");
+    throw new Error("Підтримуються лише зображення JPEG, PNG і WebP");
   }
 
   if (file.size > 10 * 1024 * 1024) {
-    throw new Error("The image must be smaller than 10 MB");
+    throw new Error("Зображення має бути меншим за 10 МБ");
   }
 
   const formData = new FormData();
@@ -437,18 +664,18 @@ export async function uploadMedia(
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error("Your session expired. Sign in again");
+      throw new Error("Сесія завершилася. Увійдіть знову");
     }
 
     if (response.status === 413) {
-      throw new Error("The image must be smaller than 10 MB");
+      throw new Error("Зображення має бути меншим за 10 МБ");
     }
 
     if (response.status === 415) {
-      throw new Error("Only JPEG, PNG and WebP images are supported");
+      throw new Error("Підтримуються лише зображення JPEG, PNG і WebP");
     }
 
-    throw new Error(`Image upload failed (${response.status})`);
+    throw new Error(`Не вдалося завантажити зображення (${response.status})`);
   }
 
   return response.json();

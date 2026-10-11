@@ -10,6 +10,17 @@ export function AdminLogoutButton() {
   const [busy, setBusy] = useState(false);
 
   async function handleLogout() {
+    const hasUnsavedChanges = document.querySelector(
+      '[data-editor-dirty="true"]',
+    );
+
+    if (
+      hasUnsavedChanges &&
+      !window.confirm("Є незбережені зміни. Вийти без збереження?")
+    ) {
+      return;
+    }
+
     try {
       setBusy(true);
       await logoutAdmin();
@@ -26,7 +37,7 @@ export function AdminLogoutButton() {
       disabled={busy}
       onClick={() => void handleLogout()}
     >
-      {busy ? "Signing out…" : "Sign out"}
+      {busy ? "Виходимо…" : "Вийти"}
     </button>
   );
 }

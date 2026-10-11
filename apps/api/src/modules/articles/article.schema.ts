@@ -32,7 +32,16 @@ export const CreateArticleSchema = z.object({
     .string()
     .uuid(),
 
+  sectionId: z
+    .string()
+    .uuid(),
+
   categoryId: z
+    .string()
+    .uuid()
+    .optional(),
+
+  placeId: z
     .string()
     .uuid()
     .optional(),
@@ -48,20 +57,19 @@ export const UpdateArticleSchema = z.object({
   excerpt: z.string().trim().max(500).nullable().optional(),
   content: z.string().min(1).optional(),
   authorId: z.string().uuid().optional(),
-  coverImage: z
-  .string()
-  .min(1)
-  .nullable()
-  .optional(),
+  sectionId: z.string().uuid().optional(),
+  coverImage: z.string().min(1).nullable().optional(),
 
   categoryId: z
     .string()
     .uuid()
     .nullable()
     .optional(),
-  
-    
-
+  placeId: z
+    .string()
+    .uuid()
+    .nullable()
+    .optional(),
   tagIds: z
     .array(z.string().uuid())
     .optional(),

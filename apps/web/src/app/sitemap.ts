@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getPublishedArticles } from "../api/server";
+import { getPublishedArticles, getVisibleSections } from "../api/server";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +8,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:5173"
   ).replace(/\/+$/, "");
-  const articles = await getPublishedArticles();
+  const [articles, sections] = await Promise.all([
+    getPublishedArticles(),
+    getVisibleSections(),
+  ]);
 
   return [
     {
@@ -17,6 +20,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 1,
     },
+    ...sections.map((section) => ({
+      url: `${siteUrl}/${section.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    })),
     ...articles.map((article) => ({
       url: `${siteUrl}/articles/${article.slug}`,
       lastModified: new Date(article.updatedAt),

@@ -14,13 +14,23 @@ type AdminShellProps = {
 const navigation = [
   {
     href: "/admin/articles",
-    label: "Articles",
-    description: "Write and publish",
+    label: "Статті",
+    description: "Створення й публікація",
   },
   {
     href: "/admin/content",
-    label: "Content data",
-    description: "Authors, categories, tags",
+    label: "Довідники",
+    description: "Автори, рубрики й теги",
+  },
+  {
+    href: "/admin/sections",
+    label: "Розділи",
+    description: "Меню публічного сайту",
+  },
+  {
+    href: "/admin/places",
+    label: "Місця",
+    description: "Карта, адреси й типи",
   },
 ] as const;
 
@@ -31,13 +41,13 @@ export function AdminShell({ adminEmail, children }: AdminShellProps) {
     <div className="admin-area">
       <aside className="admin-sidebar">
         <div className="admin-sidebar__identity">
-          <Link href="/admin/articles" aria-label="DORIDA CMS home">
+          <Link href="/admin/articles" aria-label="Головна сторінка DORIDA CMS">
             <strong>DORIDA</strong>
-            <span>Editorial CMS</span>
+            <span>Редакційна CMS</span>
           </Link>
         </div>
 
-        <nav className="admin-sidebar__nav" aria-label="CMS navigation">
+        <nav className="admin-sidebar__nav" aria-label="Навігація CMS">
           {navigation.map((item) => {
             const active = pathname.startsWith(item.href);
 
@@ -56,7 +66,7 @@ export function AdminShell({ adminEmail, children }: AdminShellProps) {
 
         <Link className="admin-sidebar__new" href="/admin/articles/new">
           <span aria-hidden="true">＋</span>
-          New article
+          Нова стаття
         </Link>
 
         <div className="admin-sidebar__footer">
@@ -66,12 +76,12 @@ export function AdminShell({ adminEmail, children }: AdminShellProps) {
             target="_blank"
             rel="noreferrer"
           >
-            View publication
+            Відкрити сайт
             <span aria-hidden="true">↗</span>
           </Link>
 
           <div className="admin-sidebar__account">
-            <span>Signed in as</span>
+            <span>Ви увійшли як</span>
             <strong title={adminEmail}>{adminEmail}</strong>
             <AdminLogoutButton />
           </div>
@@ -82,7 +92,7 @@ export function AdminShell({ adminEmail, children }: AdminShellProps) {
         <header className="admin-mobile-header">
           <Link href="/admin/articles">DORIDA CMS</Link>
           <div>
-            <Link href="/admin/articles/new">New article</Link>
+            <Link href="/admin/articles/new">Нова стаття</Link>
             <AdminLogoutButton />
           </div>
         </header>

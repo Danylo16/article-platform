@@ -4,6 +4,10 @@ import remarkGfm from "remark-gfm";
 
 import { getMediaUrl } from "../api/media";
 import { ArticleMarkdownImage } from "../components/ArticleMarkdownImage";
+import {
+  PublicSiteFooter,
+  PublicSiteHeader,
+} from "../components/public/PublicSiteChrome";
 import type { Article } from "../types/article";
 
 function formatDate(value: string) {
@@ -32,27 +36,7 @@ export function ArticlePage({ article }: { article: Article }) {
 
   return (
     <div className="article-page">
-      <header className="article-page__site-header">
-        <div className="article-page__site-header-inner">
-          <Link
-            className="article-page__brand"
-            href="/"
-            aria-label="DORIDA Startseite"
-          >
-            <strong>DORIDA</strong>
-            <span>Journal aus Wien</span>
-          </Link>
-
-          <nav className="article-page__nav" aria-label="Hauptnavigation">
-            <Link href="/">Neueste</Link>
-            {article.category && (
-              <Link href={`/?category=${article.category.slug}`}>
-                {article.category.name}
-              </Link>
-            )}
-          </nav>
-        </div>
-      </header>
+      <PublicSiteHeader activeSectionSlug={article.section.slug} />
 
       <main className="article-page__main">
         <article>
@@ -61,7 +45,13 @@ export function ArticlePage({ article }: { article: Article }) {
               <p className="article-page__eyebrow">
                 Wien
                 <span aria-hidden="true">·</span>
-                {article.category?.name ?? "Reportage"}
+                {article.section.name}
+                {article.category && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    {article.category.name}
+                  </>
+                )}
               </p>
 
               <h1>{article.title}</h1>
@@ -112,7 +102,10 @@ export function ArticlePage({ article }: { article: Article }) {
           <div className="article-page__content-grid">
             <aside className="article-page__aside" aria-label="Artikelinformationen">
               <span>DORIDA</span>
-              <p>{article.category?.name ?? "Journal aus Wien"}</p>
+              <p>
+                {article.section.name}
+                {article.category ? ` · ${article.category.name}` : ""}
+              </p>
             </aside>
 
             <div className="article-page__prose">
@@ -155,25 +148,15 @@ export function ArticlePage({ article }: { article: Article }) {
               </div>
             </section>
 
-            <Link className="article-page__back-link" href="/">
+            <Link className="article-page__back-link" href={`/${article.section.slug}`}>
               <span aria-hidden="true">←</span>
-              Alle Geschichten
+              Mehr aus {article.section.name}
             </Link>
           </footer>
         </article>
       </main>
 
-      <footer className="article-page__site-footer">
-        <div>
-          <strong>DORIDA</strong>
-          <span>Journal aus Wien</span>
-        </div>
-        <p>
-          Geschichten über Menschen, Kultur und Politik – nah an Wien und mit
-          Blick in die Tiefe.
-        </p>
-        <small>© {new Date().getFullYear()} DORIDA</small>
-      </footer>
+      <PublicSiteFooter />
     </div>
   );
 }

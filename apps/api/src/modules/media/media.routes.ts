@@ -1,6 +1,9 @@
 import type { FastifyInstance } from "fastify";
 
-import { saveImage } from "./media.service.js";
+import {
+  MediaStorageConfigurationError,
+  saveImage,
+} from "./media.service.js";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -53,6 +56,17 @@ export default async function mediaRoutes(
       ) {
         return reply.status(400).send({
           error: "INVALID_FILE_EXTENSION",
+        });
+      }
+
+      if (error instanceof MediaStorageConfigurationError) {
+        request.log.error(
+          { err: error },
+          "Media storage configuration is invalid",
+        );
+
+        return reply.status(503).send({
+          error: "MEDIA_STORAGE_UNAVAILABLE",
         });
       }
 

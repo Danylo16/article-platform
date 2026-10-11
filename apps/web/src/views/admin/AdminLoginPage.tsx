@@ -25,7 +25,7 @@ export function AdminLoginPage({ nextPath }: { nextPath: string }) {
       setError(
         loginError instanceof Error
           ? loginError.message
-          : "Login failed",
+          : "Не вдалося увійти",
       );
     } finally {
       setBusy(false);
@@ -37,13 +37,13 @@ export function AdminLoginPage({ nextPath }: { nextPath: string }) {
       <section className="admin-login__panel">
         <div className="admin-login__identity">
           <p className="admin-login__eyebrow">DORIDA</p>
-          <h1>Editorial desk</h1>
-          <p>Sign in to manage articles and newsroom content.</p>
+          <h1>Редакційна панель</h1>
+          <p>Увійди</p>
         </div>
 
         <form className="admin-login__form" onSubmit={handleSubmit}>
           <label>
-            <span>Email</span>
+            <span>Електронна пошта</span>
             <input
               type="email"
               autoComplete="username"
@@ -54,7 +54,7 @@ export function AdminLoginPage({ nextPath }: { nextPath: string }) {
           </label>
 
           <label>
-            <span>Password</span>
+            <span>Пароль</span>
             <input
               type="password"
               autoComplete="current-password"
@@ -71,7 +71,7 @@ export function AdminLoginPage({ nextPath }: { nextPath: string }) {
           )}
 
           <button type="submit" disabled={busy}>
-            {busy ? "Signing in…" : "Sign in"}
+            {busy ? "Входимо…" : "Увійти"}
           </button>
         </form>
       </section>

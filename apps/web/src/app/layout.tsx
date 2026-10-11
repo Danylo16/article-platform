@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import "maplibre-gl/dist/maplibre-gl.css";
 import "../index.css";
 import "../views/HomePage.css";
 import "../views/ArticlePage.css";
+import "../views/LocationsPage.css";
 import "../components/ArticleMarkdownImage.css";
 import "../components/admin/InlineMediaEditor.css";
 import "../components/admin/AdminShell.css";
 import "../views/admin/AdminArticleEditorPage.css";
 import "../views/admin/AdminArticlesPage.css";
 import "../views/admin/AdminContentPage.css";
+import "../views/admin/AdminPlacesPage.css";
+import "../views/admin/AdminSectionsPage.css";
 import "../views/admin/AdminAuth.css";
+import "../views/admin/AdminTheme.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:5173";
 

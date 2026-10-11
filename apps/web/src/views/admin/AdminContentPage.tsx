@@ -28,12 +28,33 @@ type NamedEntitySectionProps = {
   title: string;
   description: string;
   singular: string;
+  createPlaceholder: string;
+  emptyMessage: string;
   items: NamedEntity[];
   busy: boolean;
   onCreate: (name: string) => Promise<void>;
   onUpdate: (id: string, name: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 };
+
+function formatArticleCount(count: number) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+
+  if (lastTwo >= 11 && lastTwo <= 14) {
+    return `${count} статей`;
+  }
+
+  if (last === 1) {
+    return `${count} стаття`;
+  }
+
+  if (last >= 2 && last <= 4) {
+    return `${count} статті`;
+  }
+
+  return `${count} статей`;
+}
 
 function EditableNamedRow({
   item,
@@ -55,7 +76,7 @@ function EditableNamedRow({
   return (
     <div className="content-admin-row">
       <label>
-        <span className="sr-only">{singular} name</span>
+        <span className="sr-only">Назва: {singular.toLowerCase()}</span>
         <input
           type="text"
           value={name}
@@ -66,7 +87,7 @@ function EditableNamedRow({
 
       <code>{item.slug}</code>
       <span className="content-admin-row__usage">
-        {usageCount} {usageCount === 1 ? "article" : "articles"}
+        {formatArticleCount(usageCount)}
       </span>
 
       <button
@@ -77,7 +98,7 @@ function EditableNamedRow({
           void onUpdate(item.id, name.trim()).catch(() => undefined);
         }}
       >
-        Save
+        Зберегти
       </button>
 
       <button
@@ -86,16 +107,16 @@ function EditableNamedRow({
         disabled={busy || usageCount > 0}
         title={
           usageCount > 0
-            ? `Remove this ${singular.toLowerCase()} from its articles first`
+            ? `Спочатку приберіть «${item.name}» зі статей`
             : undefined
         }
         onClick={() => {
-          if (window.confirm(`Delete ${item.name}?`)) {
+          if (window.confirm(`Видалити «${item.name}»?`)) {
             void onDelete(item.id).catch(() => undefined);
           }
         }}
       >
-        Delete
+        Видалити
       </button>
     </div>
   );
@@ -105,6 +126,8 @@ function NamedEntitySection({
   title,
   description,
   singular,
+  createPlaceholder,
+  emptyMessage,
   items,
   busy,
   onCreate,
@@ -140,7 +163,7 @@ function NamedEntitySection({
             type="text"
             value={newName}
             maxLength={100}
-            placeholder={`New ${singular.toLowerCase()}`}
+            placeholder={createPlaceholder}
             onChange={(event) => setNewName(event.target.value)}
           />
           <button
@@ -148,14 +171,14 @@ function NamedEntitySection({
             type="submit"
             disabled={busy || newName.trim().length < 2}
           >
-            Add
+            Додати
           </button>
         </form>
       </div>
 
       <div className="content-admin-list">
         {items.length === 0 && (
-          <p className="content-admin-empty">No {title.toLowerCase()} yet.</p>
+          <p className="content-admin-empty">{emptyMessage}</p>
         )}
 
         {items.map((item) => (
@@ -200,7 +223,7 @@ function EditableAuthorRow({
     <div className="content-admin-author">
       <div className="content-admin-author__fields">
         <label>
-          <span>Name</span>
+          <span>Ім’я</span>
           <input
             type="text"
             value={name}
@@ -210,7 +233,7 @@ function EditableAuthorRow({
         </label>
 
         <label>
-          <span>Avatar URL</span>
+          <span>URL аватара</span>
           <input
             type="text"
             value={avatarUrl}
@@ -221,7 +244,7 @@ function EditableAuthorRow({
         </label>
 
         <label className="content-admin-author__bio">
-          <span>Bio</span>
+          <span>Біографія</span>
           <textarea
             rows={2}
             value={bio}
@@ -233,7 +256,7 @@ function EditableAuthorRow({
 
       <div className="content-admin-author__actions">
         <span>
-          {usageCount} {usageCount === 1 ? "article" : "articles"}
+          {formatArticleCount(usageCount)}
         </span>
         <button
           className="content-admin-button"
@@ -247,7 +270,7 @@ function EditableAuthorRow({
             }).catch(() => undefined);
           }}
         >
-          Save
+          Зберегти
         </button>
         <button
           className="content-admin-button content-admin-button--danger"
@@ -255,16 +278,16 @@ function EditableAuthorRow({
           disabled={busy || usageCount > 0}
           title={
             usageCount > 0
-              ? "Reassign this author's articles before deleting"
+              ? "Спочатку призначте статтям іншого автора"
               : undefined
           }
           onClick={() => {
-            if (window.confirm(`Delete ${author.name}?`)) {
+            if (window.confirm(`Видалити автора «${author.name}»?`)) {
               void onDelete(author.id).catch(() => undefined);
             }
           }}
         >
-          Delete
+          Видалити
         </button>
       </div>
     </div>
@@ -309,7 +332,7 @@ export function AdminContentPage() {
       })
       .catch(() => {
         if (!cancelled) {
-          setError("Failed to load CMS content data.");
+          setError("Не вдалося завантажити довідники CMS.");
         }
       })
       .finally(() => {
@@ -333,7 +356,7 @@ export function AdminContentPage() {
       setError(
         mutationError instanceof Error
           ? mutationError.message
-          : "The change could not be saved.",
+          : "Не вдалося зберегти зміни.",
       );
       throw mutationError;
     } finally {
@@ -342,16 +365,16 @@ export function AdminContentPage() {
   }
 
   if (loading) {
-    return <main className="content-admin-shell">Loading content data...</main>;
+    return <main className="content-admin-shell">Завантажуємо довідники…</main>;
   }
 
   return (
     <main className="content-admin-shell">
       <header className="content-admin-header">
         <div>
-          <span>Editorial workspace</span>
-          <h1>Content data</h1>
-          <p>Manage the reusable authors, categories and tags shown in the editor.</p>
+          <span>Редакційний простір</span>
+          <h1>Довідники</h1>
+          <p>Керування</p>
         </div>
       </header>
 
@@ -364,8 +387,8 @@ export function AdminContentPage() {
       <section className="content-admin-section">
         <div className="content-admin-section__heading">
           <div>
-            <h2>Authors</h2>
-            <p>Authors in use cannot be deleted until their articles are reassigned.</p>
+            <h2>Автори</h2>
+            <p>Автора не можна видалити, доки до нього прив’язані статті.</p>
           </div>
         </div>
 
@@ -398,7 +421,7 @@ export function AdminContentPage() {
           <input
             type="text"
             value={newAuthor.name}
-            placeholder="Author name"
+            placeholder="Ім’я автора"
             maxLength={120}
             onChange={(event) =>
               setNewAuthor((current) => ({
@@ -410,7 +433,7 @@ export function AdminContentPage() {
           <input
             type="text"
             value={newAuthor.avatarUrl}
-            placeholder="Avatar URL (optional)"
+            placeholder="URL аватара (необов’язково)"
             maxLength={500}
             onChange={(event) =>
               setNewAuthor((current) => ({
@@ -422,7 +445,7 @@ export function AdminContentPage() {
           <input
             type="text"
             value={newAuthor.bio}
-            placeholder="Short bio (optional)"
+            placeholder="Коротка біографія (необов’язково)"
             maxLength={1000}
             onChange={(event) =>
               setNewAuthor((current) => ({
@@ -436,7 +459,7 @@ export function AdminContentPage() {
             type="submit"
             disabled={busy || newAuthor.name.trim().length < 2}
           >
-            Add author
+            Додати автора
           </button>
         </form>
 
@@ -458,9 +481,11 @@ export function AdminContentPage() {
       </section>
 
       <NamedEntitySection
-        title="Categories"
-        description="Renaming a category updates it everywhere without losing article links."
-        singular="Category"
+        title="Рубрики"
+        description="Перейменування рубрики оновить її всюди, не змінюючи посилання на статті."
+        singular="Рубрика"
+        createPlaceholder="Нова рубрика"
+        emptyMessage="Рубрик ще немає."
         items={categories}
         busy={busy}
         onCreate={(name) =>
@@ -475,9 +500,11 @@ export function AdminContentPage() {
       />
 
       <NamedEntitySection
-        title="Tags"
-        description="Tags in use stay protected until removed from their articles."
-        singular="Tag"
+        title="Теги"
+        description="Тег не можна видалити, доки він використовується у статтях."
+        singular="Тег"
+        createPlaceholder="Новий тег"
+        emptyMessage="Тегів ще немає."
         items={tags}
         busy={busy}
         onCreate={(name) =>

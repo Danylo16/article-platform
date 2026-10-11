@@ -16,6 +16,8 @@ import {
 } from "node:url";
 
 import articlePublicRoutes from "./modules/articles/article.public.routes.js";
+import sectionPublicRoutes from "./modules/sections/section.public.routes.js";
+import placePublicRoutes from "./modules/places/place.public.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
 
@@ -94,6 +96,20 @@ export async function buildApp() {
     articlePublicRoutes,
     {
       prefix: "/articles",
+    },
+  );
+
+  await app.register(
+    sectionPublicRoutes,
+    {
+      prefix: "/sections",
+    },
+  );
+
+  await app.register(
+    placePublicRoutes,
+    {
+      prefix: "/places",
     },
   );
 

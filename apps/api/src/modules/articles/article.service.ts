@@ -8,15 +8,25 @@ import type {
 } from "./article.schema.js";
 import { calculateReadingTime } from "./article.reading-time.js";
 
-export async function getAllArticles() {
+export async function getAllArticles(sectionSlug?: string) {
   return prisma.article.findMany({
     where: {
       status: "PUBLISHED",
+      ...(sectionSlug
+        ? {
+            section: {
+              slug: sectionSlug,
+              isVisible: true,
+            },
+          }
+        : {}),
     },
 
     include: {
       author: true,
+      section: true,
       category: true,
+      place: { include: { type: true } },
       tags: {
         include: {
           tag: true,
@@ -34,7 +44,9 @@ export async function getAllAdminArticles() {
   return prisma.article.findMany({
     include: {
       author: true,
+      section: true,
       category: true,
+      place: { include: { type: true } },
       tags: {
         include: {
           tag: true,
@@ -56,7 +68,9 @@ export async function getArticleById(id: string) {
 
     include: {
       author: true,
+      section: true,
       category: true,
+      place: { include: { type: true } },
       tags: {
         include: {
           tag: true,
@@ -75,7 +89,9 @@ export async function getPublishedArticleBySlug(slug: string) {
 
     include: {
       author: true,
+      section: true,
       category: true,
+      place: { include: { type: true } },
       tags: {
         include: {
           tag: true,
@@ -118,7 +134,9 @@ export async function createArticle(
       slug,
 
       authorId: input.authorId,
+      sectionId: input.sectionId,
       categoryId: input.categoryId,
+      placeId: input.placeId,
 
       status: "DRAFT",
 
@@ -135,7 +153,9 @@ export async function createArticle(
 
     include: {
       author: true,
+      section: true,
       category: true,
+      place: { include: { type: true } },
       tags: {
         include: {
           tag: true,
@@ -185,7 +205,9 @@ export async function updateArticle(
 
     include: {
       author: true,
+      section: true,
       category: true,
+      place: { include: { type: true } },
       tags: {
         include: {
           tag: true,
@@ -214,7 +236,9 @@ export async function publishArticle(id: string) {
 
     include: {
       author: true,
+      section: true,
       category: true,
+      place: { include: { type: true } },
       tags: {
         include: {
           tag: true,
@@ -237,7 +261,9 @@ export async function unpublishArticle(id: string) {
 
     include: {
       author: true,
+      section: true,
       category: true,
+      place: { include: { type: true } },
       tags: {
         include: {
           tag: true,

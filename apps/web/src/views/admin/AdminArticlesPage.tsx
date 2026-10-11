@@ -10,14 +10,14 @@ import type { Article, ArticleStatus } from "../../types/article";
 type StatusFilter = "ALL" | ArticleStatus;
 
 const statusLabels: Record<ArticleStatus, string> = {
-  DRAFT: "Draft",
-  SCHEDULED: "Scheduled",
-  PUBLISHED: "Published",
-  ARCHIVED: "Archived",
+  DRAFT: "Чернетка",
+  SCHEDULED: "Заплановано",
+  PUBLISHED: "Опубліковано",
+  ARCHIVED: "Архів",
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("de-AT", {
+  return new Intl.DateTimeFormat("uk-UA", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -60,7 +60,7 @@ export function AdminArticlesPage() {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "Failed to load articles",
+              : "Не вдалося завантажити статті",
           );
         }
       })
@@ -101,6 +101,7 @@ export function AdminArticlesPage() {
         article.subtitle,
         article.excerpt,
         article.author.name,
+        article.section.name,
         article.category?.name,
       ]
         .filter(Boolean)
@@ -112,30 +113,30 @@ export function AdminArticlesPage() {
     <main className="admin-articles">
       <header className="admin-articles__header">
         <div>
-          <p className="admin-articles__eyebrow">Editorial workspace</p>
-          <h1>Articles</h1>
+          <p className="admin-articles__eyebrow">Редакційний простір</p>
+          <h1>Статті</h1>
           <p className="admin-articles__intro">
-            Draft, review and publish every story from one place.
+            Створюй, перевіряй та публікуй матеріали.
           </p>
         </div>
 
         <Link className="admin-articles__create" href="/admin/articles/new">
           <span aria-hidden="true">＋</span>
-          New article
+          Нова стаття
         </Link>
       </header>
 
-      <section className="admin-articles__stats" aria-label="Article summary">
+      <section className="admin-articles__stats" aria-label="Статистика статей">
         <div>
-          <span>All articles</span>
+          <span>Усі статті</span>
           <strong>{counts.all}</strong>
         </div>
         <div>
-          <span>Published</span>
+          <span>Опубліковані</span>
           <strong>{counts.published}</strong>
         </div>
         <div>
-          <span>Drafts</span>
+          <span>Чернетки</span>
           <strong>{counts.drafts}</strong>
         </div>
       </section>
@@ -143,23 +144,23 @@ export function AdminArticlesPage() {
       <section className="admin-articles__panel">
         <div className="admin-articles__toolbar">
           <label className="admin-articles__search">
-            <span className="sr-only">Search articles</span>
+            <span className="sr-only">Пошук статей</span>
             <span aria-hidden="true">⌕</span>
             <input
               type="search"
               value={search}
-              placeholder="Search title, author or category"
+              placeholder="Пошук за назвою, автором, розділом або рубрикою"
               onChange={(event) => setSearch(event.target.value)}
             />
           </label>
 
           <label className="admin-articles__filter">
-            <span>Status</span>
+            <span>Статус</span>
             <select
               value={status}
               onChange={(event) => setStatus(event.target.value as StatusFilter)}
             >
-              <option value="ALL">All statuses</option>
+              <option value="ALL">Усі статуси</option>
               {Object.entries(statusLabels).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -171,7 +172,7 @@ export function AdminArticlesPage() {
 
         {loading && (
           <div className="admin-articles__message" aria-live="polite">
-            Loading articles…
+            Завантажуємо статті…
           </div>
         )}
 
@@ -186,18 +187,18 @@ export function AdminArticlesPage() {
                 setReloadKey((value) => value + 1);
               }}
             >
-              Try again
+              Спробувати ще раз
             </button>
           </div>
         )}
 
         {!loading && !error && visibleArticles.length === 0 && (
           <div className="admin-articles__message">
-            <h2>{articles.length === 0 ? "No articles yet" : "No matching articles"}</h2>
+            <h2>{articles.length === 0 ? "Статей ще немає" : "Нічого не знайдено"}</h2>
             <p>
               {articles.length === 0
-                ? "Create the first draft to start the publication."
-                : "Change the search or status filter."}
+                ? "Створіть першу чернетку, щоб розпочати роботу."
+                : "Змініть пошуковий запит або фільтр статусу."}
             </p>
           </div>
         )}
@@ -205,10 +206,10 @@ export function AdminArticlesPage() {
         {!loading && !error && visibleArticles.length > 0 && (
           <div className="admin-articles__list">
             <div className="admin-articles__list-header" aria-hidden="true">
-              <span>Story</span>
-              <span>Status</span>
-              <span>Author</span>
-              <span>Updated</span>
+              <span>Матеріал</span>
+              <span>Статус</span>
+              <span>Автор</span>
+              <span>Оновлено</span>
               <span />
             </div>
 
@@ -223,7 +224,10 @@ export function AdminArticlesPage() {
                   </span>
                   <span className="admin-article-row__title">
                     <strong>{article.title}</strong>
-                    <small>{article.category?.name ?? "Uncategorised"}</small>
+                    <small>
+                      {article.section.name}
+                      {article.category ? ` · ${article.category.name}` : ""}
+                    </small>
                   </span>
                 </Link>
 
@@ -240,9 +244,9 @@ export function AdminArticlesPage() {
                 <Link
                   className="admin-article-row__edit"
                   href={`/admin/articles/${article.id}`}
-                  aria-label={`Edit ${article.title}`}
+                  aria-label={`Редагувати: ${article.title}`}
                 >
-                  Edit
+                  Редагувати
                   <span aria-hidden="true">→</span>
                 </Link>
               </article>

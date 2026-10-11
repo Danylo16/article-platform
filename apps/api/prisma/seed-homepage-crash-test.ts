@@ -24,6 +24,15 @@ const prisma = new PrismaClient({
   adapter,
 });
 
+const sectionSeeds = [
+  { name: "EVENTS", slug: "events", navigationOrder: 1 },
+  { name: "LOCATIONS", slug: "locations", navigationOrder: 2 },
+  { name: "MODE", slug: "mode", navigationOrder: 3 },
+  { name: "KULTUR", slug: "kultur", navigationOrder: 4 },
+  { name: "INTERVIEWS", slug: "interviews", navigationOrder: 5 },
+  { name: "NEWS", slug: "news", navigationOrder: 6 },
+] as const;
+
 const categorySeeds = [
   { name: "Reportage", slug: "reportage" },
   { name: "Kultur", slug: "kultur" },
@@ -42,7 +51,69 @@ const tagSeeds = [
   { name: "Gespräch", slug: "gespraech" },
 ] as const;
 
-const articleSeeds = [
+const locationTypeSeeds = [
+  {
+    name: "Cafés",
+    slug: "cafes",
+    icon: "coffee",
+    navigationOrder: 1,
+  },
+  {
+    name: "Restaurants",
+    slug: "restaurants",
+    icon: "restaurant",
+    navigationOrder: 2,
+  },
+  {
+    name: "Freizeit",
+    slug: "freizeit",
+    icon: "music",
+    navigationOrder: 3,
+  },
+] as const;
+
+const placeSeeds = [
+  {
+    name: "Café Jelinek",
+    slug: "cafe-jelinek",
+    typeSlug: "cafes",
+    address: "Otto-Bauer-Gasse 5, 1060 Wien",
+    latitude: 48.1977,
+    longitude: 16.3504,
+  },
+  {
+    name: "Karmelitermarkt",
+    slug: "karmelitermarkt",
+    typeSlug: "restaurants",
+    address: "Karmelitermarkt, 1020 Wien",
+    latitude: 48.2169,
+    longitude: 16.3798,
+  },
+  {
+    name: "WUK",
+    slug: "wuk",
+    typeSlug: "freizeit",
+    address: "Währinger Straße 59, 1090 Wien",
+    latitude: 48.2231,
+    longitude: 16.3513,
+  },
+] as const;
+
+type ArticleSeed = {
+  title: string;
+  slug: string;
+  subtitle: string | null;
+  excerpt: string;
+  content: string;
+  readingTime: number;
+  publishedAt: Date;
+  sectionSlug: string;
+  categorySlug: string | null;
+  tagSlugs: string[];
+  placeSlug?: string;
+};
+
+const articleSeeds: ArticleSeed[] = [
   {
     title: "Wien bei Nacht",
     slug: "crash-test-wien-bei-nacht",
@@ -55,6 +126,7 @@ Die Stadt klingt nach Mitternacht anders. Straßenbahnen werden seltener, Gespr�
 Diese kurze Testgeschichte prüft, wie DORIDA mit wenig Text umgeht.`,
     readingTime: 2,
     publishedAt: new Date("2026-09-15T08:00:00.000Z"),
+    sectionSlug: "news",
     categorySlug: "stadtleben",
     tagSlugs: ["wien", "stadt"],
   },
@@ -83,6 +155,7 @@ Eine leer stehende Werkstatt kann Galerie, Redaktion oder Treffpunkt werden. Ein
 Die Stadt verändert sich dabei nicht nur baulich. Sie verändert sich durch die Geschichten, die über sie erzählt werden.`,
     readingTime: 6,
     publishedAt: new Date("2026-09-14T11:30:00.000Z"),
+    sectionSlug: "news",
     categorySlug: "reportage",
     tagSlugs: ["wien", "menschen", "stadt"],
   },
@@ -103,6 +176,7 @@ Doch die Mieten steigen, Gewohnheiten ändern sich und viele Gespräche wandern 
 Die Besitzerin sagt, sie denke nicht in großen Begriffen über das Ende einer Ära nach. Sie öffnet einfach am nächsten Morgen wieder die Tür.`,
     readingTime: 4,
     publishedAt: new Date("2026-09-13T07:15:00.000Z"),
+    sectionSlug: "kultur",
     categorySlug: "kultur",
     tagSlugs: ["wien", "kultur", "menschen"],
   },
@@ -132,6 +206,7 @@ Bürgerbeteiligung funktioniert nur, wenn Ergebnisse offen sind und Rückmeldung
 Die Frage, wem die Stadt gehört, hat deshalb keine einfache Antwort. Aber sie sollte regelmäßig und öffentlich gestellt werden.`,
     readingTime: 8,
     publishedAt: new Date("2026-09-12T15:45:00.000Z"),
+    sectionSlug: "news",
     categorySlug: "politik",
     tagSlugs: ["wien", "stadt", "politik"],
   },
@@ -164,6 +239,7 @@ Wien ist längst Alltag geworden. Trotzdem bleibt das Gefühl, mehrere Orte glei
 Das Gespräch endet nicht mit einer eindeutigen Antwort. Es endet mit einer neuen Skizze auf einem Blatt Papier.`,
     readingTime: 10,
     publishedAt: new Date("2026-09-11T09:20:00.000Z"),
+    sectionSlug: "interviews",
     categorySlug: "interviews",
     tagSlugs: ["menschen", "kultur", "gespraech"],
   },
@@ -185,6 +261,7 @@ Es passiert nichts Besonderes. Genau deshalb eignet sich dieser Moment, um zu be
 Mit jeder ankommenden Bahn wird der Ort lauter. Die kurze Ruhe verschwindet, ohne dass jemand ihren Übergang bemerkt.`,
     readingTime: 3,
     publishedAt: new Date("2026-09-10T05:00:00.000Z"),
+    sectionSlug: "news",
     categorySlug: null,
     tagSlugs: ["wien", "menschen"],
   },
@@ -205,10 +282,78 @@ Das Festival ist klein genug, um persönlich zu bleiben, und groß genug, um die
 Nach dem letzten Konzert werden Kabel eingerollt und Stühle gestapelt. Für kurze Zeit bleibt die Erinnerung daran, dass dieselben Räume auch anders genutzt werden können.`,
     readingTime: 5,
     publishedAt: new Date("2026-09-09T17:30:00.000Z"),
+    sectionSlug: "events",
     categorySlug: "events",
     tagSlugs: ["wien", "kultur", "stadt"],
   },
-] as const;
+  {
+    title: "Ein Vormittag im Café Jelinek",
+    slug: "crash-test-cafe-jelinek",
+    subtitle:
+      "Ein Wiener Kaffeehaus, das seine Ruhe nicht für einen Trend opfert.",
+    excerpt:
+      "Zwischen Melange, Zeitung und abgewetzten Polstern bleibt hier Zeit länger liegen als anderswo.",
+    content: `# Ein Vormittag im Café Jelinek
+
+Das Café braucht keine Inszenierung. Die roten Polster, die Zeitungen und das gedämpfte Licht erzählen selbst, warum Menschen wiederkommen.
+
+## Der richtige Rhythmus
+
+Am Vormittag ist es ruhig genug für ein Gespräch, aber nie vollkommen still. Tassen klirren, Seiten rascheln, die Tür öffnet sich regelmäßig.
+
+Das Jelinek eignet sich nicht für Eile. Genau darin liegt seine Stärke.`,
+    readingTime: 4,
+    publishedAt: new Date("2026-09-08T09:00:00.000Z"),
+    sectionSlug: "locations",
+    categorySlug: "stadtleben",
+    tagSlugs: ["wien", "stadt"],
+    placeSlug: "cafe-jelinek",
+  },
+  {
+    title: "Karmelitermarkt: Frühstück zwischen Marktstand und Nachbarschaft",
+    slug: "crash-test-karmelitermarkt",
+    subtitle: "Drei Adressen, ein Markt und kein Grund für Eile.",
+    excerpt:
+      "Wo der zweite Bezirk am Wochenende früh wach wird und ein Frühstück leicht bis zum Mittag dauert.",
+    content: `# Frühstück am Karmelitermarkt
+
+Der Markt ist überschaubar genug, um nicht zur Kulisse zu werden. Händlerinnen, Stammgäste und Besucher teilen denselben engen Raum.
+
+## Mehr als ein einzelnes Lokal
+
+Die interessante Route führt nicht nur an einen Tisch. Sie beginnt bei den Marktständen und endet dort, wo gerade noch ein Platz frei ist.
+
+Für einen langsamen Samstagvormittag ist das eine der verlässlichsten Adressen der Leopoldstadt.`,
+    readingTime: 5,
+    publishedAt: new Date("2026-09-07T08:30:00.000Z"),
+    sectionSlug: "locations",
+    categorySlug: "stadtleben",
+    tagSlugs: ["wien", "menschen", "stadt"],
+    placeSlug: "karmelitermarkt",
+  },
+  {
+    title: "WUK: Was in einer ehemaligen Lokomotivfabrik alles Platz findet",
+    slug: "crash-test-wuk",
+    subtitle: "Konzerte, Werkstätten und politische Kultur unter einem Dach.",
+    excerpt:
+      "Das WUK ist kein einzelner Veranstaltungsort, sondern eine kleine Stadt aus Bühnen, Höfen und Arbeitsräumen.",
+    content: `# Ein Haus mit vielen Eingängen
+
+Wer das WUK nur wegen eines Konzerts besucht, sieht zunächst einen Ausschnitt. Hinter den sichtbaren Bühnen liegen Werkstätten, Initiativen und Räume für Bildung.
+
+## Ein Ort, der Widersprüche aushält
+
+Das Gebäude wirkt gleichzeitig improvisiert und dauerhaft. Genau diese Spannung macht seinen Charakter aus.
+
+Am besten funktioniert ein Besuch, wenn vor oder nach der Veranstaltung genug Zeit für den Innenhof bleibt.`,
+    readingTime: 5,
+    publishedAt: new Date("2026-09-06T18:00:00.000Z"),
+    sectionSlug: "locations",
+    categorySlug: "kultur",
+    tagSlugs: ["wien", "kultur", "stadt"],
+    placeSlug: "wuk",
+  },
+];
 
 async function main() {
   const author =
@@ -231,6 +376,22 @@ async function main() {
         bio: "Journalistin und Gründerin von DORIDA.",
       },
     }));
+
+  const sections = await Promise.all(
+    sectionSeeds.map((section) =>
+      prisma.section.upsert({
+        where: {
+          slug: section.slug,
+        },
+        update: {
+          name: section.name,
+          navigationOrder: section.navigationOrder,
+          isVisible: true,
+        },
+        create: section,
+      }),
+    ),
+  );
 
   const categories = await Promise.all(
     categorySeeds.map((category) =>
@@ -260,12 +421,80 @@ async function main() {
     ),
   );
 
-  const categoryIds = new Map(
+  const locationTypes = await Promise.all(
+    locationTypeSeeds.map((locationType) =>
+      prisma.locationType.upsert({
+        where: {
+          slug: locationType.slug,
+        },
+        update: {
+          name: locationType.name,
+          icon: locationType.icon,
+          navigationOrder: locationType.navigationOrder,
+          isVisible: true,
+        },
+        create: locationType,
+      }),
+    ),
+  );
+
+  const locationTypeIds = new Map<string, string>(
+    locationTypes.map((locationType) => [locationType.slug, locationType.id]),
+  );
+
+  const places = await Promise.all(
+    placeSeeds.map((place) => {
+      const typeId = locationTypeIds.get(place.typeSlug);
+
+      if (!typeId) {
+        throw new Error(`Missing seeded location type: ${place.typeSlug}`);
+      }
+
+      return prisma.place.upsert({
+        where: {
+          slug: place.slug,
+        },
+        update: {
+          name: place.name,
+          typeId,
+          address: place.address,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          isVisible: true,
+        },
+        create: {
+          name: place.name,
+          slug: place.slug,
+          typeId,
+          address: place.address,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          isVisible: true,
+        },
+      });
+    }),
+  );
+
+  const categoryIds = new Map<string, string>(
     categories.map((category) => [category.slug, category.id]),
   );
-  const tagIds = new Map(tags.map((tag) => [tag.slug, tag.id]));
+  const sectionIds = new Map<string, string>(
+    sections.map((section) => [section.slug, section.id]),
+  );
+  const tagIds = new Map<string, string>(
+    tags.map((tag) => [tag.slug, tag.id]),
+  );
+  const placeIds = new Map<string, string>(
+    places.map((place) => [place.slug, place.id]),
+  );
 
   for (const article of articleSeeds) {
+    const sectionId = sectionIds.get(article.sectionSlug);
+
+    if (!sectionId) {
+      throw new Error(`Missing seeded section: ${article.sectionSlug}`);
+    }
+
     const categoryId = article.categorySlug
       ? categoryIds.get(article.categorySlug)
       : null;
@@ -278,6 +507,13 @@ async function main() {
 
       return tagId;
     });
+    const placeId = article.placeSlug
+      ? placeIds.get(article.placeSlug)
+      : null;
+
+    if (article.placeSlug && !placeId) {
+      throw new Error(`Missing seeded place: ${article.placeSlug}`);
+    }
 
     const articleData = {
       title: article.title,
@@ -288,7 +524,9 @@ async function main() {
       status: "PUBLISHED" as const,
       publishedAt: article.publishedAt,
       authorId: author.id,
+      sectionId,
       categoryId,
+      placeId,
     };
     const articleTags = articleTagIds.map((tagId) => ({
       tag: {
@@ -320,7 +558,7 @@ async function main() {
   }
 
   console.log(
-    `Homepage crash-test data ready: ${articleSeeds.length} published articles, ${categories.length} categories, ${tags.length} tags. Author: ${author.name}.`,
+    `Homepage crash-test data ready: ${articleSeeds.length} published articles, ${sections.length} sections, ${places.length} places, ${categories.length} categories, ${tags.length} tags. Author: ${author.name}.`,
   );
 }
 
