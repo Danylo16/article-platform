@@ -1,3 +1,4 @@
+import { indexingEnabled, siteUrl as getSiteUrl } from "../lib/seo";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
@@ -17,10 +18,13 @@ import "../views/admin/AdminSectionsPage.css";
 import "../views/admin/AdminAuth.css";
 import "../views/admin/AdminTheme.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:5173";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  robots: indexingEnabled() ? { index: true, follow: true, googleBot: { "max-image-preview": "large" } } : { index: false, follow: false },
+  openGraph: { siteName: "DORIDA", locale: "de_AT", type: "website", title: "DORIDA — Journal aus Wien", description: "Geschichten über Menschen, Kultur und Politik aus Wien.", images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "DORIDA — Journal aus Wien" }] },
+  twitter: { card: "summary_large_image" },
   title: {
     default: "DORIDA — Journal aus Wien",
     template: "%s | DORIDA",

@@ -29,11 +29,7 @@ export async function getPublicPlaces() {
   return prisma.place.findMany({
     where: {
       isVisible: true,
-      articles: {
-        some: {
-          status: "PUBLISHED",
-        },
-      },
+      type: { isVisible: true },
     },
     include: {
       type: true,
@@ -52,6 +48,8 @@ export async function getPublicPlaces() {
           subtitle: true,
           excerpt: true,
           coverImage: true,
+          coverFocusX: true,
+          coverFocusY: true,
           publishedAt: true,
         },
       },

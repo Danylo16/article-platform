@@ -1,3 +1,4 @@
+import { indexingEnabled } from "../lib/seo";
 import type { MetadataRoute } from "next";
 
 import { getPublishedArticles, getVisibleSections } from "../api/server";
@@ -5,6 +6,7 @@ import { getPublishedArticles, getVisibleSections } from "../api/server";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  if (!indexingEnabled()) return [];
   const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:5173"
   ).replace(/\/+$/, "");
@@ -16,13 +18,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {
       url: siteUrl,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
     },
     ...sections.map((section) => ({
       url: `${siteUrl}/${section.slug}`,
-      lastModified: new Date(),
       changeFrequency: "daily" as const,
       priority: 0.9,
     })),

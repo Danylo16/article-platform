@@ -86,8 +86,8 @@
 .sections-admin-card input[type="number"] {
   min-width: 0;
   padding: 10px 11px;
-  border: 1px solid #ced4da;
-  background: #fff;
+  border: 1px solid var(--admin-line-strong);
+  background: var(--admin-field);
   color: inherit;
   font: inherit;
 }

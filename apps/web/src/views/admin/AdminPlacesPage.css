@@ -95,9 +95,9 @@
   width: 100%;
   min-width: 0;
   padding: 10px 11px;
-  border: 1px solid #ced4da;
-  background: #fff;
-  color: #18202c;
+  border: 1px solid var(--admin-line-strong);
+  background: var(--admin-field);
+  color: var(--admin-text);
   font: inherit;
   font-size: 14px;
 }
@@ -109,43 +109,164 @@
 }
 
 .places-icon-picker {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 6px;
+  position: relative;
   margin-top: 14px;
 }
 
-.places-icon-picker button {
+.places-icon-picker > summary {
   display: grid;
-  min-width: 0;
-  min-height: 48px;
-  place-items: center;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 6px 12px 6px 6px;
   border: 1px solid #2a3444;
   border-radius: 8px;
   background: #151d29;
-  color: #91a0b6;
+  color: #f5f7fb;
   cursor: pointer;
+  list-style: none;
 }
 
-.places-icon-picker button:hover,
-.places-icon-picker button:focus-visible,
-.places-icon-picker button.is-active {
+.places-icon-picker > summary::-webkit-details-marker {
+  display: none;
+}
+
+.places-icon-picker > summary:hover,
+.places-icon-picker > summary:focus-visible,
+.places-icon-picker[open] > summary {
   border-color: #7391ff;
   background: #1b2945;
-  color: #dfe7ff;
 }
 
-.places-icon-picker svg {
+.places-icon-picker__selected-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 7px;
+  background: #4169e1;
+  color: #fff;
+}
+
+.places-icon-picker__selected-icon svg {
   width: 21px;
   height: 21px;
 }
 
-.places-icon-picker span {
+.places-icon-picker > summary > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+}
+
+.places-icon-picker > summary small {
+  color: #8290a8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.places-icon-picker > summary strong {
+  font-size: 13px;
+}
+
+.places-icon-picker__chevron {
+  color: #8290a8;
+  font-size: 13px;
+  transition: transform 160ms ease;
+}
+
+.places-icon-picker[open] .places-icon-picker__chevron {
+  transform: rotate(180deg);
+}
+
+.places-icon-picker__panel {
   position: absolute;
+  z-index: 20;
+  top: calc(100% + 7px);
+  right: 0;
+  left: 0;
+  padding: 12px;
+  border: 1px solid #303b4d;
+  border-radius: 10px;
+  background: #111925;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 38%);
+}
+
+.places-icon-picker__search {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.places-icon-picker__search > span {
+  color: #8f9db2;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.places-icon-picker__search input {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid #303b4d;
+  background: #0c121c;
+  color: #f5f7fb;
+  font: inherit;
+  font-size: 13px;
+}
+
+.places-icon-picker__grid {
+  display: grid;
+  max-height: 260px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.places-icon-picker__grid button {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 6px 8px;
+  border: 1px solid #293446;
+  border-radius: 7px;
+  background: #151d29;
+  color: #a8b3c5;
+  cursor: pointer;
+  text-align: left;
+}
+
+.places-icon-picker__grid button:hover,
+.places-icon-picker__grid button:focus-visible,
+.places-icon-picker__grid button.is-active {
+  border-color: #7391ff;
+  background: #1b2945;
+  color: #fff;
+}
+
+.places-icon-picker__grid button svg {
+  width: 19px;
+  height: 19px;
+}
+
+.places-icon-picker__grid button span {
   overflow: hidden;
-  width: 1px;
-  height: 1px;
-  clip: rect(0, 0, 0, 0);
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.places-icon-picker__empty {
+  margin: 12px 0 2px;
+  color: #8f9db2;
+  font-size: 12px;
 }
 
 .places-type-card__actions {
@@ -168,23 +289,7 @@
   margin-top: 18px;
   padding: 18px;
   border: 1px dashed var(--admin-line);
-  background: #f6f8fb;
-}
-
-.places-type-create .places-icon-picker {
-  grid-template-columns: repeat(8, 48px);
-}
-
-.places-type-create .places-icon-picker button {
-  border-color: #d7dce4;
-  background: #fff;
-  color: #536072;
-}
-
-.places-type-create .places-icon-picker button.is-active {
-  border-color: #4169e1;
-  background: #e8edff;
-  color: #244fc7;
+  background: var(--admin-panel-raised);
 }
 
 .places-type-create > .content-admin-button,
@@ -373,12 +478,8 @@
     width: min(100% - 28px, 1180px);
   }
 
-  .places-icon-picker {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .places-type-create .places-icon-picker {
-    grid-template-columns: repeat(4, 48px);
+  .places-icon-picker__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

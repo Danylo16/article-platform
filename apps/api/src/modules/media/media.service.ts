@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const UPLOAD_DIR = resolve(__dirname, "../../../uploads");
+const UPLOAD_DIR = resolve(process.env.UPLOAD_DIR ?? resolve(__dirname, "../../../uploads"));
 
 const EXTENSIONS_BY_MIME_TYPE: Record<string, readonly string[]> = {
   "image/jpeg": [".jpeg", ".jpg"],

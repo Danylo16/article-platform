@@ -116,6 +116,12 @@ export async function createArticle(input: {
   excerpt?: string;
   content: string;
   coverImage?: string;
+  coverAlt?: string | null;
+  coverCaption?: string | null;
+  coverCredit?: string | null;
+  coverFocusX?: number;
+  coverFocusY?: number;
+
   authorId: string;
   sectionId: string;
   categoryId?: string;
@@ -148,6 +154,12 @@ export async function updateArticle(
     excerpt: string | null;
     content: string;
     coverImage: string | null;
+    coverAlt: string | null;
+    coverCaption: string | null;
+    coverCredit: string | null;
+    coverFocusX: number;
+    coverFocusY: number;
+
     authorId: string;
     sectionId: string;
     categoryId: string | null;
@@ -522,6 +534,7 @@ export async function createAuthor(input: {
   name: string;
   bio?: string | null;
   avatarUrl?: string | null;
+  instagramUrl?: string | null;
 }): Promise<Author> {
   const response = await apiFetch(`${API_URL}/admin/authors`, {
     method: "POST",
@@ -544,6 +557,7 @@ export async function updateAuthor(
     name: string;
     bio?: string | null;
     avatarUrl?: string | null;
+  instagramUrl?: string | null;
   },
 ): Promise<Author> {
   const response = await apiFetch(`${API_URL}/admin/authors/${id}`, {
@@ -678,5 +692,30 @@ export async function uploadMedia(
     throw new Error(`Не вдалося завантажити зображення (${response.status})`);
   }
 
+  return response.json();
+}
+
+export async function reorderAdminItems(resource: "sections" | "location-types", ids: string[], expectedIds: string[]): Promise<void> {
+  const response = await apiFetch(`${API_URL}/admin/${resource}/reorder`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids, expectedIds }),
+  });
+  if (response.status === 409) throw new Error("Список змінився. Оновіть дані та повторіть упорядкування.");
+  if (!response.ok) throw new Error("Не вдалося зберегти порядок. Спробуйте ще раз.");
+}
+
+export async function getPublicDisplaySettings(): Promise<{ categoriesEnabled: boolean }> {
+  const response = await apiFetch(`${API_URL}/admin/public-settings`, { cache: "no-store" });
+  if (!response.ok) throw new Error("Не вдалося завантажити налаштування рубрик.");
+  return response.json();
+}
+
+export async function setPublicCategoriesEnabled(categoriesEnabled: boolean): Promise<{ categoriesEnabled: boolean }> {
+  const response = await apiFetch(`${API_URL}/admin/public-settings`, {
+    method: "PATCH", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ categoriesEnabled }),
+  });
+  if (!response.ok) throw new Error("Не вдалося зберегти налаштування рубрик.");
   return response.json();
 }

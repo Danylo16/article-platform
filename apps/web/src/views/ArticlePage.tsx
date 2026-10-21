@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AuthorAvatar } from "../components/public/AuthorAvatar";
+import { categoryHref, sameLabel } from "../lib/public-categories";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -18,15 +20,6 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-function getInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
-
 export function ArticlePage({ article }: { article: Article }) {
   const coverUrl = getMediaUrl(article.coverImage);
   const avatarUrl = getMediaUrl(article.author.avatarUrl);
@@ -38,18 +31,18 @@ export function ArticlePage({ article }: { article: Article }) {
     <div className="article-page">
       <PublicSiteHeader activeSectionSlug={article.section.slug} />
 
-      <main className="article-page__main">
+      <main id="public-content" tabIndex={-1} className="article-page__main">
         <article>
           <header className="article-page__hero">
             <div className="article-page__heading">
               <p className="article-page__eyebrow">
                 Wien
                 <span aria-hidden="true">·</span>
-                {article.section.name}
-                {article.category && (
+                <Link href={`/${article.section.slug}`}>{article.section.name}</Link>
+                {article.category && !sameLabel(article.category.name, article.section.name) && (
                   <>
                     <span aria-hidden="true">·</span>
-                    {article.category.name}
+                    <Link href={categoryHref(article.category.slug)}>{article.category.name}</Link>
                   </>
                 )}
               </p>
@@ -75,21 +68,17 @@ export function ArticlePage({ article }: { article: Article }) {
                 {article.readingTime && article.readingTime > 0 ? (
                   <>
                     <span className="article-page__meta-dot" aria-hidden="true" />
-                    <span>{article.readingTime} Min. Lesezeit</span>
+                    <span>ca. {article.readingTime} Min. Lesezeit</span>
                   </>
                 ) : null}
               </div>
             </div>
 
-            {coverUrl ? (
+            {coverUrl && (
               <figure className="article-page__cover">
-                <img src={coverUrl} alt="" fetchPriority="high" />
+                <img src={coverUrl} alt={article.coverAlt ?? ""} fetchPriority="high" />
+                {(article.coverCaption || article.coverCredit) && <figcaption>{article.coverCaption}{article.coverCredit && <span> · Foto: {article.coverCredit}</span>}</figcaption>}
               </figure>
-            ) : (
-              <div className="article-page__cover-fallback" aria-hidden="true">
-                <span>{article.category?.name ?? "DORIDA"}</span>
-                <strong>DORIDA</strong>
-              </div>
             )}
           </header>
 
@@ -104,7 +93,7 @@ export function ArticlePage({ article }: { article: Article }) {
               <span>DORIDA</span>
               <p>
                 {article.section.name}
-                {article.category ? ` · ${article.category.name}` : ""}
+                {article.category && !sameLabel(article.category.name, article.section.name) ? ` · ${article.category.name}` : ""}
               </p>
             </aside>
 
@@ -133,18 +122,13 @@ export function ArticlePage({ article }: { article: Article }) {
             )}
 
             <section className="article-page__author" aria-label="Autor">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" loading="lazy" />
-              ) : (
-                <span className="article-page__author-initials" aria-hidden="true">
-                  {getInitials(article.author.name)}
-                </span>
-              )}
+              <AuthorAvatar key={avatarUrl} src={avatarUrl} name={article.author.name} />
 
               <div>
                 <p>Autorin · Autor</p>
                 <h2>{article.author.name}</h2>
                 {article.author.bio && <div>{article.author.bio}</div>}
+                {article.author.instagramUrl && <a className="author-social-link" href={article.author.instagramUrl} target="_blank" rel="noopener noreferrer">Instagram ↗</a>}
               </div>
             </section>
 

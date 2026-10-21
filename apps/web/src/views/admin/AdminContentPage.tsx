@@ -1,6 +1,11 @@
 "use client";
 
+import { isInstagramUrl } from "../../lib/social-links";
+import { AuthorPhotoUpload } from "../../components/admin/AuthorPhotoUpload";
+import { PublicCategorySettings } from "../../components/admin/PublicCategorySettings";
 import { useEffect, useState } from "react";
+import { AdminCollection, AdminDraftGuard, AdminRecord, confirmAdminDiscard } from "@/components/admin/AdminCollection";
+
 
 import {
   createAuthor,
@@ -74,6 +79,7 @@ function EditableNamedRow({
   const unchanged = name.trim() === item.name;
 
   return (
+    <AdminRecord title={item.name} meta={`${item.slug} · ${formatArticleCount(usageCount)}`} dirty={!unchanged}>
     <div className="content-admin-row">
       <label>
         <span className="sr-only">Назва: {singular.toLowerCase()}</span>
@@ -119,6 +125,7 @@ function EditableNamedRow({
         Видалити
       </button>
     </div>
+    </AdminRecord>
   );
 }
 
@@ -127,7 +134,6 @@ function NamedEntitySection({
   description,
   singular,
   createPlaceholder,
-  emptyMessage,
   items,
   busy,
   onCreate,
@@ -144,7 +150,7 @@ function NamedEntitySection({
           <p>{description}</p>
         </div>
 
-        <form
+        <form data-admin-dirty={newName ? "true" : undefined} data-editor-dirty={newName ? "true" : undefined}
           onSubmit={(event) => {
             event.preventDefault();
 
@@ -163,6 +169,7 @@ function NamedEntitySection({
             type="text"
             value={newName}
             maxLength={100}
+            aria-label={createPlaceholder}
             placeholder={createPlaceholder}
             onChange={(event) => setNewName(event.target.value)}
           />
@@ -176,22 +183,10 @@ function NamedEntitySection({
         </form>
       </div>
 
-      <div className="content-admin-list">
-        {items.length === 0 && (
-          <p className="content-admin-empty">{emptyMessage}</p>
-        )}
-
-        {items.map((item) => (
-          <EditableNamedRow
-            key={item.id}
-            item={item}
-            singular={singular}
-            busy={busy}
-            onUpdate={onUpdate}
-            onDelete={onDelete}
-          />
-        ))}
-      </div>
+      <AdminCollection busy={busy} items={items} label={title} renderItem={(item) => (
+        <EditableNamedRow key={JSON.stringify(item)} item={item} singular={singular} busy={busy}
+          onUpdate={onUpdate} onDelete={onDelete} />
+      )} />
     </section>
   );
 }
@@ -206,20 +201,23 @@ function EditableAuthorRow({
   busy: boolean;
   onUpdate: (
     id: string,
-    input: { name: string; bio: string | null; avatarUrl: string | null },
+    input: { name: string; bio: string | null; avatarUrl: string | null; instagramUrl: string | null },
   ) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }) {
   const [name, setName] = useState(author.name);
   const [bio, setBio] = useState(author.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(author.avatarUrl ?? "");
+  const [instagramUrl, setInstagramUrl] = useState(author.instagramUrl ?? "");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const usageCount = author._count?.articles ?? 0;
   const unchanged =
     name.trim() === author.name &&
     bio.trim() === (author.bio ?? "") &&
-    avatarUrl.trim() === (author.avatarUrl ?? "");
+    avatarUrl.trim() === (author.avatarUrl ?? "") && instagramUrl.trim() === (author.instagramUrl ?? "");
 
   return (
+    <AdminRecord title={author.name} meta={formatArticleCount(usageCount)} dirty={!unchanged || uploadingAvatar}>
     <div className="content-admin-author">
       <div className="content-admin-author__fields">
         <label>
@@ -232,16 +230,9 @@ function EditableAuthorRow({
           />
         </label>
 
-        <label>
-          <span>URL аватара</span>
-          <input
-            type="text"
-            value={avatarUrl}
-            maxLength={500}
-            placeholder="/uploads/..."
-            onChange={(event) => setAvatarUrl(event.target.value)}
-          />
-        </label>
+        <AuthorPhotoUpload value={avatarUrl} onChange={setAvatarUrl} onBusy={setUploadingAvatar} disabled={busy} />
+        <label><span>Instagram автора</span><input type="url" value={instagramUrl} maxLength={500}
+          placeholder="https://www.instagram.com/…" aria-invalid={!isInstagramUrl(instagramUrl)} onChange={event => setInstagramUrl(event.target.value)} />{!isInstagramUrl(instagramUrl) && <small role="alert">Вкажіть повне HTTPS-посилання на Instagram.</small>}</label>
 
         <label className="content-admin-author__bio">
           <span>Біографія</span>
@@ -261,12 +252,13 @@ function EditableAuthorRow({
         <button
           className="content-admin-button"
           type="button"
-          disabled={busy || unchanged || name.trim().length < 2}
+          disabled={busy || uploadingAvatar || unchanged || name.trim().length < 2 || !isInstagramUrl(instagramUrl)}
           onClick={() => {
             void onUpdate(author.id, {
               name: name.trim(),
               bio: bio.trim() || null,
               avatarUrl: avatarUrl.trim() || null,
+              instagramUrl: instagramUrl.trim() || null,
             }).catch(() => undefined);
           }}
         >
@@ -275,7 +267,7 @@ function EditableAuthorRow({
         <button
           className="content-admin-button content-admin-button--danger"
           type="button"
-          disabled={busy || usageCount > 0}
+          disabled={busy || uploadingAvatar || usageCount > 0}
           title={
             usageCount > 0
               ? "Спочатку призначте статтям іншого автора"
@@ -291,10 +283,14 @@ function EditableAuthorRow({
         </button>
       </div>
     </div>
+    </AdminRecord>
   );
 }
 
 export function AdminContentPage() {
+  const [uploadingNewAvatar, setUploadingNewAvatar] = useState(false);
+  const [tab, setTab] = useState("authors");
+  const [message, setMessage] = useState<string | null>(null);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -304,7 +300,7 @@ export function AdminContentPage() {
   const [newAuthor, setNewAuthor] = useState({
     name: "",
     bio: "",
-    avatarUrl: "",
+    avatarUrl: "", instagramUrl: "",
   });
 
   async function refreshData() {
@@ -350,8 +346,10 @@ export function AdminContentPage() {
     try {
       setBusy(true);
       setError(null);
+      setMessage(null);
       await action();
       await refreshData();
+      setMessage("Зміни збережено.");
     } catch (mutationError) {
       setError(
         mutationError instanceof Error
@@ -370,11 +368,12 @@ export function AdminContentPage() {
 
   return (
     <main className="content-admin-shell">
+      <AdminDraftGuard />
       <header className="content-admin-header">
         <div>
           <span>Редакційний простір</span>
           <h1>Довідники</h1>
-          <p>Керування</p>
+          <p>Автори, рубрики й теги. Відкрийте запис для редагування.</p>
         </div>
       </header>
 
@@ -384,7 +383,16 @@ export function AdminContentPage() {
         </div>
       )}
 
-      <section className="content-admin-section">
+      {message && <p className="save-message" role="status">{message}</p>}
+      <nav className="admin-collection-tabs" aria-label="Довідники">
+        {[["authors", "Автори", authors.length], ["categories", "Рубрики", categories.length], ["tags", "Теги", tags.length]].map(([value, label, count]) => (
+          <button type="button" className="admin-button" disabled={busy || uploadingNewAvatar} key={value} aria-pressed={tab === value}
+            onClick={() => { if (value !== tab && confirmAdminDiscard()) { setTab(String(value)); setNewAuthor({ name: "", bio: "", avatarUrl: "", instagramUrl: "" }); } }}>
+            {label} · {count}
+          </button>
+        ))}
+      </nav>
+      {tab === "authors" && <section className="content-admin-section">
         <div className="content-admin-section__heading">
           <div>
             <h2>Автори</h2>
@@ -394,10 +402,12 @@ export function AdminContentPage() {
 
         <form
           className="content-admin-new-author"
+          data-admin-dirty={(uploadingNewAvatar || Object.values(newAuthor).some(Boolean)) ? "true" : undefined}
+          data-editor-dirty={(uploadingNewAvatar || Object.values(newAuthor).some(Boolean)) ? "true" : undefined}
           onSubmit={(event) => {
             event.preventDefault();
 
-            if (newAuthor.name.trim().length < 2) {
+            if (uploadingNewAvatar || !isInstagramUrl(newAuthor.instagramUrl) || newAuthor.name.trim().length < 2) {
               return;
             }
 
@@ -406,13 +416,14 @@ export function AdminContentPage() {
                 name: newAuthor.name.trim(),
                 bio: newAuthor.bio.trim() || null,
                 avatarUrl: newAuthor.avatarUrl.trim() || null,
+                instagramUrl: newAuthor.instagramUrl.trim() || null,
               }),
             )
               .then(() =>
                 setNewAuthor({
                   name: "",
                   bio: "",
-                  avatarUrl: "",
+                  avatarUrl: "", instagramUrl: "",
                 }),
               )
               .catch(() => undefined);
@@ -421,6 +432,7 @@ export function AdminContentPage() {
           <input
             type="text"
             value={newAuthor.name}
+            aria-label="Ім’я автора"
             placeholder="Ім’я автора"
             maxLength={120}
             onChange={(event) =>
@@ -430,21 +442,14 @@ export function AdminContentPage() {
               }))
             }
           />
-          <input
-            type="text"
-            value={newAuthor.avatarUrl}
-            placeholder="URL аватара (необов’язково)"
-            maxLength={500}
-            onChange={(event) =>
-              setNewAuthor((current) => ({
-                ...current,
-                avatarUrl: event.target.value,
-              }))
-            }
-          />
+          <AuthorPhotoUpload value={newAuthor.avatarUrl} onBusy={setUploadingNewAvatar} disabled={busy}
+            onChange={avatarUrl => setNewAuthor(current => ({ ...current, avatarUrl }))} />
+          <label>Instagram автора<input type="url" value={newAuthor.instagramUrl} maxLength={500}
+            placeholder="https://www.instagram.com/…" aria-invalid={!isInstagramUrl(newAuthor.instagramUrl)} onChange={event => setNewAuthor(current => ({ ...current, instagramUrl: event.target.value }))} />{!isInstagramUrl(newAuthor.instagramUrl) && <small role="alert">Вкажіть повне HTTPS-посилання на Instagram.</small>}</label>
           <input
             type="text"
             value={newAuthor.bio}
+            aria-label="Коротка біографія (необов’язково)"
             placeholder="Коротка біографія (необов’язково)"
             maxLength={1000}
             onChange={(event) =>
@@ -457,30 +462,22 @@ export function AdminContentPage() {
           <button
             className="content-admin-button content-admin-button--primary"
             type="submit"
-            disabled={busy || newAuthor.name.trim().length < 2}
+            disabled={busy || uploadingNewAvatar || !isInstagramUrl(newAuthor.instagramUrl) || newAuthor.name.trim().length < 2}
           >
             Додати автора
           </button>
         </form>
 
-        <div className="content-admin-list">
-          {authors.map((author) => (
-            <EditableAuthorRow
-              key={author.id}
-              author={author}
-              busy={busy}
-              onUpdate={(id, input) =>
-                runMutation(() => updateAuthor(id, input)).then(() => undefined)
-              }
-              onDelete={(id) =>
-                runMutation(() => deleteAuthor(id)).then(() => undefined)
-              }
-            />
-          ))}
-        </div>
-      </section>
+        <AdminCollection busy={busy} items={authors.map(author => ({ ...author, slug: author.id }))} label="Автори" renderItem={author => (
+          <EditableAuthorRow key={JSON.stringify(author)} author={author} busy={busy}
+            onUpdate={(id, input) => runMutation(() => updateAuthor(id, input)).then(() => undefined)}
+            onDelete={id => runMutation(() => deleteAuthor(id)).then(() => undefined)} />
+        )} />
+      </section>}
 
-      <NamedEntitySection
+      {tab === "categories" && <PublicCategorySettings />}
+
+      {tab === "categories" && <NamedEntitySection
         title="Рубрики"
         description="Перейменування рубрики оновить її всюди, не змінюючи посилання на статті."
         singular="Рубрика"
@@ -497,9 +494,9 @@ export function AdminContentPage() {
         onDelete={(id) =>
           runMutation(() => deleteCategory(id)).then(() => undefined)
         }
-      />
+      />}
 
-      <NamedEntitySection
+      {tab === "tags" && <NamedEntitySection
         title="Теги"
         description="Тег не можна видалити, доки він використовується у статтях."
         singular="Тег"
@@ -516,7 +513,7 @@ export function AdminContentPage() {
         onDelete={(id) =>
           runMutation(() => deleteTag(id)).then(() => undefined)
         }
-      />
+      />}
     </main>
   );
 }

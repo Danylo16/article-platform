@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Article, Place, Section } from "../types/article";
 
 const API_URL = (
@@ -85,7 +86,9 @@ export async function getPublishedArticles(
   const path = `/articles${query}`;
   const response = await fetchPublicApi<unknown>(path);
 
-  return parseArticleList(response, path);
+  const articles = parseArticleList(response, path);
+  const enabled = await getPublicCategoriesEnabled();
+  return enabled ? articles : articles.map((article) => ({ ...article, category: null }));
 }
 
 export function getVisibleSections(): Promise<Section[]> {
@@ -120,5 +123,16 @@ export async function getPublishedArticleBySlug(
     );
   }
 
-  return article;
+  return await getPublicCategoriesEnabled() ? article : { ...article, category: null };
 }
+
+export const getPublicCategoriesEnabled = cache(async (): Promise<boolean> => {
+  try {
+    const settings = await fetchPublicApi<{ categoriesEnabled: boolean }>("/public-settings");
+    return settings.categoriesEnabled === true;
+  } catch (error) {
+    // Fail closed: do not re-expose categories when the settings endpoint is unavailable.
+    console.error("Public category settings unavailable", error);
+    return false;
+  }
+});

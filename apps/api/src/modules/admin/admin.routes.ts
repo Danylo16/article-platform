@@ -1,3 +1,4 @@
+import { adminPublicSettingsRoutes } from "../public-settings/public-settings.routes.js";
 import type { FastifyInstance } from "fastify";
 
 import articleAdminRoutes from "../articles/article.admin.routes.js";
@@ -27,6 +28,8 @@ export default async function adminRoutes(
     "preHandler",
     requireAdmin,
   );
+
+  await app.register(adminPublicSettingsRoutes, { prefix: "/public-settings" });
 
   await app.register(articleAdminRoutes, {
     prefix: "/articles",

@@ -1,4 +1,6 @@
 "use client";
+import { CoverPhotoEditor } from "../../components/admin/CoverPhotoEditor";
+import { validateImageUpload } from "../../lib/image-upload";
 
 import {
   useEffect,
@@ -26,7 +28,6 @@ import {
   updateArticle,
   uploadMedia,
 } from "../../api/client";
-import { getMediaUrl } from "../../api/media";
 import { ArticleMarkdownImage } from "../../components/ArticleMarkdownImage";
 import { InlineMediaEditor } from "../../components/admin/InlineMediaEditor";
 import type {
@@ -40,6 +41,12 @@ import type {
 } from "../../types/article";
 
 type FormState = {
+  coverAlt: string;
+  coverCaption: string;
+  coverCredit: string;
+  coverFocusX: number;
+  coverFocusY: number;
+
   title: string;
   subtitle: string;
   excerpt: string;
@@ -55,6 +62,12 @@ type FormState = {
 type EditorMode = "write" | "preview";
 
 const emptyForm: FormState = {
+  coverAlt: "",
+  coverCaption: "",
+  coverCredit: "",
+  coverFocusX: 50,
+  coverFocusY: 50,
+
   title: "",
   subtitle: "",
   excerpt: "",
@@ -81,6 +94,12 @@ function articleToForm(article: Article): FormState {
     excerpt: article.excerpt ?? "",
     content: article.content,
     coverImage: article.coverImage ?? "",
+    coverAlt: article.coverAlt ?? "",
+    coverCaption: article.coverCaption ?? "",
+    coverCredit: article.coverCredit ?? "",
+    coverFocusX: article.coverFocusX ?? 50,
+    coverFocusY: article.coverFocusY ?? 50,
+
     authorId: article.authorId,
     sectionId: article.sectionId,
     categoryId: article.categoryId ?? "",
@@ -284,8 +303,9 @@ export function AdminArticleEditorPage() {
     try {
       setUploadingCover(true);
       setError(null);
+      await validateImageUpload(file);
       const uploaded = await uploadMedia(file);
-      updateField("coverImage", uploaded.url);
+      setForm(current => ({ ...current, coverImage: uploaded.url, coverFocusX: 50, coverFocusY: 50, coverAlt: "", coverCaption: "", coverCredit: "" }));
     } catch (uploadError) {
       setError(
         uploadError instanceof Error
@@ -315,6 +335,12 @@ export function AdminArticleEditorPage() {
         excerpt: normalized.excerpt || undefined,
         content: normalized.content,
         coverImage: normalized.coverImage || undefined,
+        coverAlt: normalized.coverAlt,
+        coverCaption: normalized.coverCaption,
+        coverCredit: normalized.coverCredit,
+        coverFocusX: normalized.coverFocusX,
+        coverFocusY: normalized.coverFocusY,
+
         authorId: normalized.authorId,
         sectionId: normalized.sectionId,
         categoryId: normalized.categoryId || undefined,
@@ -337,6 +363,12 @@ export function AdminArticleEditorPage() {
       excerpt: normalized.excerpt || null,
       content: normalized.content,
       coverImage: normalized.coverImage || null,
+      coverAlt: normalized.coverAlt,
+      coverCaption: normalized.coverCaption,
+      coverCredit: normalized.coverCredit,
+      coverFocusX: normalized.coverFocusX,
+      coverFocusY: normalized.coverFocusY,
+
       authorId: normalized.authorId,
       sectionId: normalized.sectionId,
       categoryId: normalized.categoryId || null,
@@ -571,20 +603,8 @@ export function AdminArticleEditorPage() {
           </div>
 
           {form.coverImage && (
-            <div className="cover-preview">
-              <img
-                src={getMediaUrl(form.coverImage) ?? ""}
-                alt="Попередній перегляд обкладинки"
-              />
-              <button
-                type="button"
-                className="cover-remove"
-                onClick={() => updateField("coverImage", "")}
-                disabled={saving}
-              >
-                Прибрати
-              </button>
-            </div>
+            <CoverPhotoEditor value={form} disabled={saving || uploadingCover}
+              onChange={patch => setForm(current => ({ ...current, ...patch }))} />
           )}
         </div>
 

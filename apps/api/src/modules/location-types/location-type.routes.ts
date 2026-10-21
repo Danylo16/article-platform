@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { registerReorder } from "../ordering/order.route.js";
 
 import {
   CreateLocationTypeSchema,
@@ -28,6 +29,7 @@ function handleMutationError(error: unknown) {
 }
 
 export default async function locationTypeRoutes(app: FastifyInstance) {
+  registerReorder(app, "location-types");
   app.get("/", async () => getAdminLocationTypes());
 
   app.post("/", async (request, reply) => {

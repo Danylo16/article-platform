@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { registerReorder } from "../ordering/order.route.js";
 
 import { UpdateSectionSchema } from "./section.schema.js";
 import {
@@ -7,6 +8,7 @@ import {
 } from "./section.service.js";
 
 export default async function sectionAdminRoutes(app: FastifyInstance) {
+  registerReorder(app, "sections");
   app.get("/", async () => getAdminSections());
 
   app.patch("/:id", async (request, reply) => {

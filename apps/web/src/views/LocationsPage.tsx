@@ -18,7 +18,7 @@ export function LocationsPage({
     <div className="home-page locations-page">
       <PublicSiteHeader activeSectionSlug="locations" />
 
-      <main className="home-page__main">
+      <main id="public-content" tabIndex={-1} className="home-page__main">
         <header className="section-page__heading locations-page__heading">
           <p className="eyebrow">DORIDA · Wien entdecken</p>
           <h1>LOCATIONS</h1>

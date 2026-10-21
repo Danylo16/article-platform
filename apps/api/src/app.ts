@@ -1,3 +1,5 @@
+import { prisma } from "./lib/prisma.js";
+import { publicSettingsRoutes } from "./modules/public-settings/public-settings.routes.js";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
@@ -68,8 +70,7 @@ export async function buildApp() {
 
   await app.register(fastifyStatic, {
     root: resolve(
-      __dirname,
-      "../uploads",
+      process.env.UPLOAD_DIR ?? resolve(__dirname, "../uploads"),
     ),
     prefix: "/uploads/",
     setHeaders(reply) {
@@ -91,6 +92,11 @@ export async function buildApp() {
       status: "ok",
     }),
   );
+
+  app.get("/ready", async (_request, reply) => {
+    try { await prisma.$queryRaw`SELECT 1`; return { status: "ready" }; }
+    catch { return reply.code(503).send({ status: "unavailable" }); }
+  });
 
   await app.register(
     articlePublicRoutes,
@@ -126,6 +132,8 @@ export async function buildApp() {
       prefix: "/admin",
     },
   );
+
+  await app.register(publicSettingsRoutes, { prefix: "/public-settings" });
 
   return app;
 }

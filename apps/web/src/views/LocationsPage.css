@@ -44,6 +44,7 @@
 
 .locations-explorer__layout {
   display: grid;
+  height: 720px;
   min-height: 650px;
   grid-template-columns: minmax(0, 1.55fr) minmax(350px, 0.65fr);
   border: 1px solid var(--line);
@@ -85,6 +86,7 @@
 
 .locations-panel {
   min-width: 0;
+  min-height: 0;
   border-left: 1px solid var(--line);
   background: var(--deep-sea);
   color: #fff;
@@ -93,7 +95,8 @@
 .location-feature-card {
   display: grid;
   height: 100%;
-  grid-template-rows: minmax(230px, 0.8fr) minmax(0, 1.2fr);
+  min-height: 0;
+  grid-template-rows: 260px minmax(0, 1fr);
 }
 
 .location-feature-card__media {
@@ -103,7 +106,7 @@
 }
 
 .location-feature-card__media > img,
-.location-feature-card__media > div {
+.location-feature-card__placeholder {
   width: 100%;
   height: 100%;
 }
@@ -113,7 +116,7 @@
   object-fit: cover;
 }
 
-.location-feature-card__media > div {
+.location-feature-card__placeholder {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -124,12 +127,12 @@
   color: rgb(255 255 255 / 55%);
 }
 
-.location-feature-card__media > div svg {
+.location-feature-card__placeholder svg {
   width: 64px;
   height: 64px;
 }
 
-.location-feature-card__media > div span {
+.location-feature-card__placeholder span {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 2.1rem;
   letter-spacing: 0.08em;
@@ -156,7 +159,57 @@
   height: 16px;
 }
 
+.location-feature-card__navigation {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px;
+  background: rgb(9 43 76 / 88%);
+  color: #fff;
+  backdrop-filter: blur(8px);
+}
+
+.location-feature-card__navigation > span {
+  padding-left: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.location-feature-card__navigation > div {
+  display: flex;
+}
+
+.location-feature-card__navigation button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 0;
+  border-left: 1px solid rgb(255 255 255 / 18%);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.location-feature-card__navigation button:hover,
+.location-feature-card__navigation button:focus-visible {
+  background: rgb(255 255 255 / 12%);
+}
+
+.location-feature-card__navigation button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
 .location-feature-card__content {
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  scrollbar-gutter: stable;
   display: flex;
   min-height: 0;
   flex-direction: column;
@@ -196,6 +249,15 @@
   line-height: 1.22;
 }
 
+.location-feature-card__story-label {
+  margin: 0 0 9px;
+  color: var(--shell-pink);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .location-feature-card__summary {
   display: -webkit-box;
   overflow: hidden;
@@ -218,6 +280,15 @@
   text-transform: uppercase;
 }
 
+.location-feature-card__pending {
+  max-width: 310px;
+  color: rgb(255 255 255 / 68%);
+}
+
+.location-feature-card__pending h3 {
+  color: #fff;
+}
+
 .locations-panel__empty {
   display: flex;
   height: 100%;
@@ -233,46 +304,95 @@
   font-weight: 400;
 }
 
+.locations-directory {
+  padding: clamp(32px, 5vw, 58px) 0 0;
+}
+
+.locations-directory__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.locations-directory__heading .eyebrow {
+  margin: 0 0 7px;
+}
+
+.locations-directory__heading h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+
+.locations-directory__heading > p {
+  max-width: 330px;
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
 .locations-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  border-left: 1px solid var(--line);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
 }
 
 .locations-list button {
+  position: relative;
   display: grid;
   min-width: 0;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
+  grid-template-columns: 30px 42px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  padding: 20px;
+  gap: 14px;
+  padding: 20px 18px;
   border: 0;
   border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   background: transparent;
   color: var(--ink);
   cursor: pointer;
   text-align: left;
 }
 
-.locations-list button:nth-child(3n) {
+.locations-list button:nth-child(2n) {
   border-right: 0;
 }
 
 .locations-list button:hover,
 .locations-list button:focus-visible,
 .locations-list button.is-active {
-  background: rgb(145 201 222 / 18%);
+  background: rgb(145 201 222 / 17%);
+}
+
+.locations-list button.is-active::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: var(--deep-sea);
+  content: "";
+}
+
+.locations-list__number {
+  color: #bd6c83;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .locations-list__icon {
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border: 1px solid rgb(9 43 76 / 18%);
-  border-radius: 50%;
+  background: rgb(255 255 255 / 45%);
 }
 
 .locations-list__icon svg {
@@ -313,8 +433,21 @@
   white-space: nowrap;
 }
 
-.locations-list__arrow {
-  color: #bd6c83;
+.locations-list__action {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.locations-list button:hover .locations-list__action,
+.locations-list button:focus-visible .locations-list__action,
+.locations-list button.is-active .locations-list__action {
+  color: var(--deep-sea);
 }
 
 .locations-marker-shell {
@@ -352,6 +485,7 @@
 
 @media (max-width: 980px) {
   .locations-explorer__layout {
+    height: auto;
     min-height: 0;
     grid-template-columns: 1fr;
   }
@@ -366,7 +500,13 @@
     border-left: 0;
   }
 
+  .location-feature-card__content {
+    overflow-y: visible;
+    scrollbar-gutter: auto;
+  }
+
   .location-feature-card {
+    height: auto;
     grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.25fr);
     grid-template-rows: minmax(380px, auto);
   }
@@ -383,9 +523,8 @@
   }
 
   .locations-list button,
-  .locations-list button:nth-child(3n) {
+  .locations-list button:nth-child(2n) {
     border-right: 0;
-    border-bottom: 1px solid var(--line);
   }
 }
 
@@ -398,4 +537,34 @@
     flex: 1 1 calc(50% - 8px);
     justify-content: center;
   }
+
+  .locations-directory__heading {
+    display: grid;
+    gap: 10px;
+  }
+
+  .locations-list button {
+    grid-template-columns: 24px 38px minmax(0, 1fr);
+    padding: 17px 14px;
+  }
+
+  .locations-list__action {
+    display: none;
+  }
+}
+
+/* Public coastal surfaces; retain the stable map/card geometry. */
+.locations-page .locations-filters button { border-radius: 24px; }
+.locations-page .locations-explorer__layout { border-radius: 24px; overflow: hidden; }
+
+.locations-page .location-feature-card__type {
+  padding: 8px 12px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 24px;
+  background: var(--deep-sea);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: none;
 }

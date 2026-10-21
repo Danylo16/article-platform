@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { categoryHref, sameLabel } from "../../lib/public-categories";
 
 import { getMediaUrl } from "../../api/media";
 import type { Article } from "../../types/article";
@@ -41,7 +42,7 @@ export function ArticleMeta({ article }: { article: Article }) {
       {article.readingTime && article.readingTime > 0 ? (
         <>
           <span className="article-meta__dot" aria-hidden="true" />
-          <span>{article.readingTime} Min.</span>
+          <span>ca. {article.readingTime} Min.</span>
         </>
       ) : null}
     </div>
@@ -63,6 +64,7 @@ export function ArticleCover({
         className="article-cover__image"
         src={coverUrl}
         alt=""
+        style={{ objectPosition: `${article.coverFocusX ?? 50}% ${article.coverFocusY ?? 50}%` }}
         loading={eager ? "eager" : "lazy"}
         fetchPriority={eager ? "high" : "auto"}
       />
@@ -96,14 +98,14 @@ export function StoryCard({ article }: { article: Article }) {
       <div className="story-card__content">
         <p className="eyebrow">
           {article.section.name}
-          {article.category ? ` · ${article.category.name}` : ""}
+          {article.category && !sameLabel(article.category.name, article.section.name) && <> · <Link href={categoryHref(article.category.slug)}>{article.category.name}</Link></>}
         </p>
 
         <h3>
-          <Link href={`/articles/${article.slug}`}>{article.title}</Link>
+          <Link href={`/articles/${article.slug}`} title={article.title}>{article.title}</Link>
         </h3>
 
-        {summary && <p className="story-card__summary">{summary}</p>}
+        <p className="story-card__summary">{summary || ""}</p>
 
         <ArticleMeta article={article} />
       </div>

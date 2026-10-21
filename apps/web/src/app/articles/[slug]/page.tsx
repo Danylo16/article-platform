@@ -1,3 +1,4 @@
+import { absoluteUrl, articleJsonLd, seoDescription, serializeJsonLd } from "../../../lib/seo";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -19,7 +20,7 @@ export async function generateMetadata({
     return { title: "Artikel nicht gefunden" };
   }
 
-  const description = article.excerpt ?? article.subtitle ?? undefined;
+  const description = seoDescription(article.excerpt, article.subtitle, article.content);
   const coverImage = getMediaUrl(article.coverImage);
 
   return {
@@ -28,15 +29,19 @@ export async function generateMetadata({
     alternates: {
       canonical: `/articles/${article.slug}`,
     },
+    twitter: { card: "summary_large_image", title: article.title, description, images: [coverImage ?? absoluteUrl("/opengraph-image")] },
     openGraph: {
       type: "article",
+      url: absoluteUrl(`/articles/${encodeURIComponent(article.slug)}`),
+      siteName: "DORIDA",
+      locale: "de_AT",
       title: article.title,
       description,
       publishedTime: article.publishedAt ?? undefined,
       modifiedTime: article.updatedAt,
       authors: [article.author.name],
       tags: article.tags.map(({ tag }) => tag.name),
-      images: coverImage ? [{ url: coverImage }] : undefined,
+      images: [{ url: coverImage ?? absoluteUrl("/opengraph-image"), alt: article.coverAlt || article.title }],
     },
   };
 }
@@ -49,5 +54,5 @@ export default async function ArticleRoute({ params }: ArticleRouteProps) {
     notFound();
   }
 
-  return <ArticlePage article={article} />;
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd(article, getMediaUrl(article.coverImage))) }} /><ArticlePage article={article} /></>;
 }

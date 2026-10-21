@@ -112,6 +112,9 @@ export function LocationsMap({ places }: { places: Place[] }) {
     filteredPlaces.find((place) => place.id === selectedPlaceId) ??
     filteredPlaces[0] ??
     null;
+  const selectedPlaceIndex = selectedPlace
+    ? filteredPlaces.findIndex((place) => place.id === selectedPlace.id)
+    : -1;
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) {
@@ -172,13 +175,12 @@ export function LocationsMap({ places }: { places: Place[] }) {
 
     filteredPlaces.forEach((place) => {
       const markerElement = document.createElement("button");
-      const selected = place.id === selectedPlace?.id;
 
       markerElement.type = "button";
       markerElement.className = "locations-marker-shell";
       markerElement.title = place.name;
       markerElement.setAttribute("aria-label", place.name);
-      markerElement.innerHTML = `<span class="locations-marker${selected ? " is-selected" : ""}" style="--marker-color:${getMarkerColor(place.type.navigationOrder)}">${getPlaceIconMarkup(place.type.icon)}</span>`;
+      markerElement.innerHTML = `<span class="locations-marker" style="--marker-color:${getMarkerColor(place.type.navigationOrder)}">${getPlaceIconMarkup(place.type.icon)}</span>`;
       markerElement.addEventListener("click", () => {
         setSelectedPlaceId(place.id);
       });
@@ -207,7 +209,16 @@ export function LocationsMap({ places }: { places: Place[] }) {
         duration: 700,
       });
     }
-  }, [filteredPlaces, mapReady, selectedPlace?.id]);
+  }, [filteredPlaces, mapReady]);
+
+  useEffect(() => {
+    markerRefs.current.forEach((marker, placeId) => {
+      marker
+        .getElement()
+        .querySelector(".locations-marker")
+        ?.classList.toggle("is-selected", placeId === selectedPlace?.id);
+    });
+  }, [selectedPlace?.id, filteredPlaces, mapReady]);
 
   function selectPlace(place: Place) {
     setSelectedPlaceId(place.id);
@@ -216,6 +227,17 @@ export function LocationsMap({ places }: { places: Place[] }) {
       zoom: 14.5,
       duration: 650,
     });
+  }
+
+  function selectAdjacentPlace(direction: -1 | 1) {
+    if (filteredPlaces.length < 2 || selectedPlaceIndex < 0) {
+      return;
+    }
+
+    const nextIndex =
+      (selectedPlaceIndex + direction + filteredPlaces.length) %
+      filteredPlaces.length;
+    selectPlace(filteredPlaces[nextIndex]);
   }
 
   const selectedArticle = selectedPlace?.articles?.[0];
@@ -261,13 +283,13 @@ export function LocationsMap({ places }: { places: Place[] }) {
         />
 
         <aside className="locations-panel" aria-live="polite">
-          {selectedPlace && selectedArticle ? (
+          {selectedPlace ? (
             <article className="location-feature-card">
               <div className="location-feature-card__media">
                 {selectedCover ? (
-                  <img src={selectedCover} alt="" />
+                  <img src={selectedCover} alt="" style={{ objectPosition: `${selectedArticle?.coverFocusX ?? 50}% ${selectedArticle?.coverFocusY ?? 50}%` }} />
                 ) : (
-                  <div aria-hidden="true">
+                  <div className="location-feature-card__placeholder" aria-hidden="true">
                     <PlaceIcon name={selectedPlace.type.icon} />
                     <span>DORIDA</span>
                   </div>
@@ -276,6 +298,30 @@ export function LocationsMap({ places }: { places: Place[] }) {
                   <PlaceIcon name={selectedPlace.type.icon} />
                   {selectedPlace.type.name}
                 </span>
+                <div className="location-feature-card__navigation">
+                  <span>
+                    {String(selectedPlaceIndex + 1).padStart(2, "0")} /{" "}
+                    {String(filteredPlaces.length).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <button
+                      type="button"
+                      aria-label="Vorheriger Ort"
+                      disabled={filteredPlaces.length < 2}
+                      onClick={() => selectAdjacentPlace(-1)}
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Nächster Ort"
+                      disabled={filteredPlaces.length < 2}
+                      onClick={() => selectAdjacentPlace(1)}
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="location-feature-card__content">
@@ -287,15 +333,29 @@ export function LocationsMap({ places }: { places: Place[] }) {
                   className="location-feature-card__rule"
                   aria-hidden="true"
                 />
-                <h3>{selectedArticle.title}</h3>
-                {(selectedArticle.excerpt ?? selectedArticle.subtitle) && (
-                  <p className="location-feature-card__summary">
-                    {selectedArticle.excerpt ?? selectedArticle.subtitle}
-                  </p>
+                {selectedArticle ? (
+                  <>
+                    <p className="location-feature-card__story-label">
+                      DORIDA empfiehlt
+                    </p>
+                    <h3>{selectedArticle.title}</h3>
+                    {(selectedArticle.excerpt ?? selectedArticle.subtitle) && (
+                      <p className="location-feature-card__summary">
+                        {selectedArticle.excerpt ?? selectedArticle.subtitle}
+                      </p>
+                    )}
+                    <Link href={`/articles/${selectedArticle.slug}`}>
+                      Artikel lesen <span aria-hidden="true">→</span>
+                    </Link>
+                  </>
+                ) : (
+                  <div className="location-feature-card__pending">
+                    <p className="location-feature-card__story-label">
+                      Redaktioneller Eintrag
+                    </p>
+                    <h3>Der Beitrag zu diesem Ort ist in Vorbereitung.</h3>
+                  </div>
                 )}
-                <Link href={`/articles/${selectedArticle.slug}`}>
-                  Artikel lesen <span aria-hidden="true">→</span>
-                </Link>
               </div>
             </article>
           ) : (
@@ -308,28 +368,45 @@ export function LocationsMap({ places }: { places: Place[] }) {
       </div>
 
       {filteredPlaces.length > 0 && (
-        <div className="locations-list" aria-label="Liste der Orte">
-          {filteredPlaces.map((place) => (
-            <button
-              key={place.id}
-              type="button"
-              className={place.id === selectedPlace?.id ? "is-active" : ""}
-              onClick={() => selectPlace(place)}
-            >
-              <span className="locations-list__icon">
-                <PlaceIcon name={place.type.icon} />
-              </span>
-              <span className="locations-list__content">
-                <small>{place.type.name}</small>
-                <strong>{place.name}</strong>
-                <em>{place.address}</em>
-              </span>
-              <span className="locations-list__arrow" aria-hidden="true">
-                →
-              </span>
-            </button>
-          ))}
-        </div>
+        <section
+          className="locations-directory"
+          aria-labelledby="locations-directory-title"
+        >
+          <header className="locations-directory__heading">
+            <div>
+              <p className="eyebrow">Alle Orte</p>
+              <h2 id="locations-directory-title">Orte auf der Karte</h2>
+            </div>
+            <p>Ort auswählen, um die Karte darauf zu zentrieren.</p>
+          </header>
+
+          <div className="locations-list">
+            {filteredPlaces.map((place, index) => (
+              <button
+                key={place.id}
+                type="button"
+                className={place.id === selectedPlace?.id ? "is-active" : ""}
+                aria-pressed={place.id === selectedPlace?.id}
+                onClick={() => selectPlace(place)}
+              >
+                <span className="locations-list__number">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="locations-list__icon">
+                  <PlaceIcon name={place.type.icon} />
+                </span>
+                <span className="locations-list__content">
+                  <small>{place.type.name}</small>
+                  <strong>{place.name}</strong>
+                  <em>{place.address}</em>
+                </span>
+                <span className="locations-list__action">
+                  Auf Karte <span aria-hidden="true">→</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
       )}
     </section>
   );

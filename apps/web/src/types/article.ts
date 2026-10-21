@@ -9,6 +9,7 @@ export interface Author {
   name: string;
   bio: string | null;
   avatarUrl: string | null;
+  instagramUrl?: string | null;
   _count?: {
     articles: number;
   };
@@ -39,12 +40,28 @@ export interface Section {
 export type PlaceIconName =
   | "coffee"
   | "restaurant"
+  | "bar"
+  | "bakery"
   | "music"
+  | "theatre"
+  | "cinema"
   | "museum"
+  | "gallery"
   | "shopping"
+  | "market"
   | "park"
+  | "nature"
   | "hotel"
-  | "landmark";
+  | "landmark"
+  | "church"
+  | "library"
+  | "sports"
+  | "wellness"
+  | "nightlife"
+  | "family"
+  | "viewpoint"
+  | "coworking"
+  | "other";
 
 export interface LocationType {
   id: string;
@@ -67,6 +84,12 @@ export interface PlaceArticle {
   subtitle: string | null;
   excerpt: string | null;
   coverImage: string | null;
+  coverAlt?: string | null;
+  coverCaption?: string | null;
+  coverCredit?: string | null;
+  coverFocusX?: number;
+  coverFocusY?: number;
+
   publishedAt: string | null;
 }
 
@@ -111,6 +134,12 @@ export interface Article {
   excerpt: string | null;
   content: string;
   coverImage: string | null;
+  coverAlt?: string | null;
+  coverCaption?: string | null;
+  coverCredit?: string | null;
+  coverFocusX?: number;
+  coverFocusY?: number;
+
   readingTime: number | null;
   status: ArticleStatus;
   publishedAt: string | null;

@@ -9,7 +9,7 @@ import type {
 import { calculateReadingTime } from "./article.reading-time.js";
 
 export async function getAllArticles(sectionSlug?: string) {
-  return prisma.article.findMany({
+  const result = await prisma.article.findMany({
     where: {
       status: "PUBLISHED",
       ...(sectionSlug
@@ -38,10 +38,11 @@ export async function getAllArticles(sectionSlug?: string) {
       publishedAt: "desc",
     },
   });
+  return result.map((article) => ({ ...article, readingTime: calculateReadingTime(article.content) }));
 }
 
 export async function getAllAdminArticles() {
-  return prisma.article.findMany({
+  const result = await prisma.article.findMany({
     include: {
       author: true,
       section: true,
@@ -58,10 +59,11 @@ export async function getAllAdminArticles() {
       createdAt: "desc",
     },
   });
+  return result.map((article) => ({ ...article, readingTime: calculateReadingTime(article.content) }));
 }
 
 export async function getArticleById(id: string) {
-  return prisma.article.findUnique({
+  const result = await prisma.article.findUnique({
     where: {
       id,
     },
@@ -78,10 +80,11 @@ export async function getArticleById(id: string) {
       },
     },
   });
+  return result ? { ...result, readingTime: calculateReadingTime(result.content) } : null;
 }
 
 export async function getPublishedArticleBySlug(slug: string) {
-  return prisma.article.findFirst({
+  const result = await prisma.article.findFirst({
     where: {
       slug,
       status: "PUBLISHED",
@@ -99,6 +102,7 @@ export async function getPublishedArticleBySlug(slug: string) {
       },
     },
   });
+  return result ? { ...result, readingTime: calculateReadingTime(result.content) } : null;
 }
 
 export async function createArticle(
@@ -129,6 +133,12 @@ export async function createArticle(
       excerpt: input.excerpt,
       content: input.content,
       coverImage: input.coverImage,
+      coverAlt: input.coverAlt,
+      coverCaption: input.coverCaption,
+      coverCredit: input.coverCredit,
+      coverFocusX: input.coverFocusX,
+      coverFocusY: input.coverFocusY,
+
       readingTime: calculateReadingTime(input.content),
 
       slug,

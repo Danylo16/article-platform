@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { CategoryFilter } from "../components/public/CategoryFilter";
+import { categoryHref, sameLabel, filterByCategory } from "../lib/public-categories";
 
 import {
   ArticleCover,
@@ -14,13 +16,15 @@ import type { Article } from "../types/article";
 type HomePageProps = {
   articles: Article[];
   loadError?: boolean;
+  categorySlug?: string;
 };
 
 export function HomePage({
   articles,
   loadError = false,
+  categorySlug,
 }: HomePageProps) {
-  const orderedArticles = [...articles].sort((first, second) => {
+  const orderedArticles = [...filterByCategory(articles, categorySlug)].sort((first, second) => {
     const firstDate = first.publishedAt
       ? new Date(first.publishedAt).getTime()
       : 0;
@@ -38,7 +42,8 @@ export function HomePage({
     <div className="home-page">
       <PublicSiteHeader />
 
-      <main className="home-page__main">
+      <main id="public-content" tabIndex={-1} className="home-page__main">
+        {!loadError && <CategoryFilter articles={articles} active={categorySlug} />}
         {loadError && (
           <section className="homepage-message" aria-live="polite">
             <p className="eyebrow">Verbindung unterbrochen</p>
@@ -53,13 +58,14 @@ export function HomePage({
         {!loadError && !leadArticle && (
           <section className="homepage-message">
             <p className="eyebrow">DORIDA Redaktion</p>
-            <h1>Die erste Geschichte ist unterwegs.</h1>
-            <p>Veröffentlichte Artikel erscheinen hier.</p>
+            <h1>{categorySlug ? "Keine Artikel in dieser Rubrik." : "Die erste Geschichte ist unterwegs."}</h1>
+            {categorySlug ? <Link className="homepage-message__link" href="/">Alle Geschichten</Link> : <p>Veröffentlichte Artikel erscheinen hier.</p>}
           </section>
         )}
 
         {!loadError && leadArticle && (
           <>
+            <div className="journal-intro"><p>Nah an Wien. Mit Blick in die Tiefe.</p></div>
             <section className="lead-story">
               <Link
                 className="lead-story__cover article-cover"
@@ -71,13 +77,13 @@ export function HomePage({
 
               <div className="lead-story__content">
                 <p className="eyebrow">
-                  Wien
+                  Neueste Geschichte
                   <span aria-hidden="true">·</span>
                   {leadArticle.section.name}
-                  {leadArticle.category && (
+                  {leadArticle.category && !sameLabel(leadArticle.category.name, leadArticle.section.name) && (
                     <>
                       <span aria-hidden="true">·</span>
-                      {leadArticle.category.name}
+                      <Link href={categoryHref(leadArticle.category.slug)}>{leadArticle.category.name}</Link>
                     </>
                   )}
                 </p>

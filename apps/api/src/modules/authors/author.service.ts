@@ -25,6 +25,7 @@ export async function createAuthor(input: CreateAuthorInput) {
       name: input.name,
       bio: input.bio,
       avatarUrl: input.avatarUrl,
+      instagramUrl: input.instagramUrl,
     },
   });
 }
@@ -41,6 +42,7 @@ export async function updateAuthor(
       name: input.name,
       bio: input.bio,
       avatarUrl: input.avatarUrl,
+      instagramUrl: input.instagramUrl,
     },
   });
 }

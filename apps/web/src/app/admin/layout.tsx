@@ -1,3 +1,6 @@
+import "@/components/admin/EditorialMedia.css";
+import "@/components/admin/AdminCollection.css";
+
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
@@ -9,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  return children;
+  return <div className="admin-theme" lang="uk">{children}</div>;
 }

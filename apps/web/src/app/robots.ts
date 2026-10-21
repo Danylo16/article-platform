@@ -1,14 +1,8 @@
 import type { MetadataRoute } from "next";
-
+import { indexingEnabled, absoluteUrl } from "../lib/seo";
+export const dynamic = "force-dynamic";
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:5173";
-
-  return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: "/admin/",
-    },
-    sitemap: `${siteUrl.replace(/\/+$/, "")}/sitemap.xml`,
-  };
+  return indexingEnabled()
+    ? { rules: { userAgent: "*", allow: "/", disallow: ["/backend/", "/api/"] }, sitemap: absoluteUrl("/sitemap.xml") }
+    : { rules: { userAgent: "*", disallow: "/" } };
 }

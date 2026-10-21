@@ -3,12 +3,28 @@ import { z } from "zod";
 export const LocationIconSchema = z.enum([
   "coffee",
   "restaurant",
+  "bar",
+  "bakery",
   "music",
+  "theatre",
+  "cinema",
   "museum",
+  "gallery",
   "shopping",
+  "market",
   "park",
+  "nature",
   "hotel",
   "landmark",
+  "church",
+  "library",
+  "sports",
+  "wellness",
+  "nightlife",
+  "family",
+  "viewpoint",
+  "coworking",
+  "other",
 ]);
 
 const LocationTypeFieldsSchema = z.object({

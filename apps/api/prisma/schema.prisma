@@ -18,6 +18,7 @@ model Author {
   id        String  @id @default(uuid())
   name      String
   bio       String?
+  instagramUrl String?
   avatarUrl String?
 
   articles Article[]
@@ -36,6 +37,12 @@ model Article {
   content  String
 
   coverImage  String?
+  coverAlt String?
+  coverCaption String?
+  coverCredit String?
+  coverFocusX Float @default(50)
+  coverFocusY Float @default(50)
+
   readingTime Int?
 
   status      ArticleStatus @default(DRAFT)
@@ -175,4 +182,9 @@ model AdminSession {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model PublicSettings {
+  id                String  @id @default("site")
+  categoriesEnabled Boolean @default(true)
 }

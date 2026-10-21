@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { CategoryFilter } from "../components/public/CategoryFilter";
+import { categoryHref, filterByCategory } from "../lib/public-categories";
 
 import {
   ArticleCover,
@@ -19,21 +21,24 @@ type SectionPageProps = {
   };
   articles: Article[];
   loadError?: boolean;
+  categorySlug?: string;
 };
 
 export function SectionPage({
   section,
   articles,
   loadError = false,
+  categorySlug,
 }: SectionPageProps) {
-  const leadArticle = articles[0];
-  const remainingArticles = articles.slice(1);
+  const filteredArticles = filterByCategory(articles, categorySlug);
+  const leadArticle = filteredArticles[0];
+  const remainingArticles = filteredArticles.slice(1);
 
   return (
     <div className="home-page section-page">
       <PublicSiteHeader activeSectionSlug={section.slug} />
 
-      <main className="home-page__main">
+      <main id="public-content" tabIndex={-1} className="home-page__main">
         <header className="section-page__heading">
           <p className="eyebrow">DORIDA · Journal aus Wien</p>
           <h1>{section.name}</h1>
@@ -45,6 +50,8 @@ export function SectionPage({
           <span />
           <span />
         </div>
+
+        {!loadError && <CategoryFilter articles={articles} active={categorySlug} basePath={`/${section.slug}`} />}
 
         {loadError && (
           <section className="homepage-message homepage-message--compact">
@@ -59,9 +66,9 @@ export function SectionPage({
         {!loadError && !leadArticle && (
           <section className="homepage-message homepage-message--compact">
             <p className="eyebrow">{section.name}</p>
-            <h2>Die erste Geschichte ist unterwegs.</h2>
+            <h2>{categorySlug ? "Keine Artikel in dieser Rubrik." : "Die erste Geschichte ist unterwegs."}</h2>
             <p>Veröffentlichte Artikel erscheinen hier.</p>
-            <Link className="homepage-message__link" href="/">
+            <Link className="homepage-message__link" href={categorySlug ? `/${section.slug}` : "/"}>
               Alle Geschichten
             </Link>
           </section>
@@ -80,7 +87,7 @@ export function SectionPage({
 
               <div className="section-lead-story__content">
                 <p className="eyebrow">
-                  {leadArticle.category?.name ?? section.name}
+                  {leadArticle.category ? <Link href={categoryHref(leadArticle.category.slug, `/${section.slug}`)}>{leadArticle.category.name}</Link> : section.name}
                 </p>
                 <h2>
                   <Link href={`/articles/${leadArticle.slug}`}>

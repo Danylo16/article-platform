@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { AdminPagination } from "@/components/admin/AdminCollection";
+import { paginate } from "@/lib/admin-list";
 
 import { getAdminArticles } from "../../api/client";
 import { getMediaUrl } from "../../api/media";
@@ -42,6 +44,7 @@ export function AdminArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [reloadKey, setReloadKey] = useState(0);
@@ -109,6 +112,8 @@ export function AdminArticlesPage() {
     });
   }, [articles, search, status]);
 
+  const { currentPage, start, end } = paginate(visibleArticles.length, page);
+
   return (
     <main className="admin-articles">
       <header className="admin-articles__header">
@@ -150,7 +155,7 @@ export function AdminArticlesPage() {
               type="search"
               value={search}
               placeholder="Пошук за назвою, автором, розділом або рубрикою"
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => { setSearch(event.target.value); setPage(1); }}
             />
           </label>
 
@@ -158,7 +163,7 @@ export function AdminArticlesPage() {
             <span>Статус</span>
             <select
               value={status}
-              onChange={(event) => setStatus(event.target.value as StatusFilter)}
+              onChange={(event) => { setStatus(event.target.value as StatusFilter); setPage(1); }}
             >
               <option value="ALL">Усі статуси</option>
               {Object.entries(statusLabels).map(([value, label]) => (
@@ -213,7 +218,7 @@ export function AdminArticlesPage() {
               <span />
             </div>
 
-            {visibleArticles.map((article) => (
+            {visibleArticles.slice(start, end).map((article) => (
               <article className="admin-article-row" key={article.id}>
                 <Link
                   className="admin-article-row__story"
@@ -253,6 +258,8 @@ export function AdminArticlesPage() {
             ))}
           </div>
         )}
+        {!loading && !error && <AdminPagination total={visibleArticles.length}
+          page={currentPage} onChange={setPage} label="Сторінки статей" />}
       </section>
     </main>
   );

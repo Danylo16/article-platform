@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && tsc",
+    "build": "prisma generate && tsc && node scripts/copy-prisma-runtime.mjs",
     "start": "node dist/server.js",
     "seed": "tsx prisma/seed.ts",
     "seed:homepage": "tsx prisma/seed-homepage-crash-test.ts",

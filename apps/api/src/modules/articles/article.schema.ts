@@ -1,6 +1,15 @@
 import { z } from "zod";
 
+const CoverFields = {
+  coverAlt: z.string().trim().max(300).nullable().optional(),
+  coverCaption: z.string().trim().max(500).nullable().optional(),
+  coverCredit: z.string().trim().max(200).nullable().optional(),
+  coverFocusX: z.number().min(0).max(100).optional(),
+  coverFocusY: z.number().min(0).max(100).optional(),
+};
+
 export const CreateArticleSchema = z.object({
+  ...CoverFields,
   title: z
     .string()
     .trim()
@@ -52,6 +61,7 @@ export const CreateArticleSchema = z.object({
 });
 
 export const UpdateArticleSchema = z.object({
+  ...CoverFields,
   title: z.string().trim().min(3).max(200).optional(),
   subtitle: z.string().trim().max(300).nullable().optional(),
   excerpt: z.string().trim().max(500).nullable().optional(),

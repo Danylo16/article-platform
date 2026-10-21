@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AdminCollection, AdminDraftGuard, AdminRecord, confirmAdminDiscard } from "@/components/admin/AdminCollection";
+import { AdminOrderEditor } from "@/components/admin/AdminOrderEditor";
 
 import {
   createLocationType,
@@ -139,23 +141,80 @@ function IconPicker({
   value: PlaceIconName;
   onChange: (value: PlaceIconName) => void;
 }) {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const [query, setQuery] = useState("");
+  const selectedOption =
+    PLACE_ICON_OPTIONS.find((option) => option.value === value) ??
+    PLACE_ICON_OPTIONS[PLACE_ICON_OPTIONS.length - 1];
+  const filteredOptions = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase("uk");
+
+    if (!normalizedQuery) {
+      return PLACE_ICON_OPTIONS;
+    }
+
+    return PLACE_ICON_OPTIONS.filter((option) =>
+      `${option.label} ${option.keywords} ${option.value}`
+        .toLocaleLowerCase("uk")
+        .includes(normalizedQuery),
+    );
+  }, [query]);
+
   return (
-    <div className="places-icon-picker" role="radiogroup" aria-label="Іконка">
-      {PLACE_ICON_OPTIONS.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          role="radio"
-          aria-checked={value === option.value}
-          className={value === option.value ? "is-active" : ""}
-          title={option.label}
-          onClick={() => onChange(option.value)}
+    <details className="places-icon-picker" ref={detailsRef}>
+      <summary>
+        <span className="places-icon-picker__selected-icon">
+          <PlaceIcon name={selectedOption.value} />
+        </span>
+        <span>
+          <small>Іконка</small>
+          <strong>{selectedOption.label}</strong>
+        </span>
+        <span className="places-icon-picker__chevron" aria-hidden="true">
+          ↓
+        </span>
+      </summary>
+
+      <div className="places-icon-picker__panel">
+        <label className="places-icon-picker__search">
+          <span>Пошук іконки</span>
+          <input
+            type="search"
+            value={query}
+            placeholder="Кава, театр, парк…"
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </label>
+
+        <div
+          className="places-icon-picker__grid"
+          role="radiogroup"
+          aria-label="Іконка типу локації"
         >
-          <PlaceIcon name={option.value} />
-          <span>{option.label}</span>
-        </button>
-      ))}
-    </div>
+          {filteredOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={value === option.value}
+              className={value === option.value ? "is-active" : ""}
+              onClick={() => {
+                onChange(option.value);
+                setQuery("");
+                detailsRef.current?.removeAttribute("open");
+              }}
+            >
+              <PlaceIcon name={option.value} />
+              <span>{option.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {filteredOptions.length === 0 && (
+          <p className="places-icon-picker__empty">Іконок не знайдено.</p>
+        )}
+      </div>
+    </details>
   );
 }
 
@@ -353,6 +412,7 @@ function EditableLocationType({
     JSON.stringify(form) === JSON.stringify(typeToForm(locationType));
 
   return (
+    <AdminRecord title={locationType.name} meta={`${usageCount} місць · ${locationType.isVisible ? "У фільтрах" : "Прихований тип"}`} icon={<PlaceIcon name={locationType.icon} />} dirty={!unchanged}>
     <article className="places-type-card">
       <div className="places-type-card__header">
         <span className="places-type-card__icon">
@@ -372,18 +432,6 @@ function EditableLocationType({
             value={form.name}
             maxLength={80}
             onChange={(event) => setForm({ ...form, name: event.target.value })}
-          />
-        </label>
-        <label>
-          <span>Порядок</span>
-          <input
-            type="number"
-            min="0"
-            max="999"
-            value={form.navigationOrder}
-            onChange={(event) =>
-              setForm({ ...form, navigationOrder: event.target.value })
-            }
           />
         </label>
       </div>
@@ -429,6 +477,7 @@ function EditableLocationType({
         </button>
       </div>
     </article>
+    </AdminRecord>
   );
 }
 
@@ -452,6 +501,7 @@ function EditablePlace({
   const unchanged = JSON.stringify(form) === JSON.stringify(placeToForm(place));
 
   return (
+    <AdminRecord title={place.name} meta={`${place.address} · ${place.isVisible ? "Видиме" : "Приховане"} · Статей: ${usageCount}`} icon={<PlaceIcon name={place.type.icon} />} dirty={!unchanged}>
     <article className="places-admin-card">
       <div className="places-admin-card__heading">
         <span className="places-admin-card__icon">
@@ -502,10 +552,13 @@ function EditablePlace({
         </button>
       </div>
     </article>
+    </AdminRecord>
   );
 }
 
 export function AdminPlacesPage() {
+  const [tab, setTab] = useState("places");
+  const [message, setMessage] = useState<string | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
   const [locationTypes, setLocationTypes] = useState<LocationType[]>([]);
   const [newPlace, setNewPlace] = useState<PlaceForm>(() => emptyPlaceForm());
@@ -561,8 +614,10 @@ export function AdminPlacesPage() {
     try {
       setBusy(true);
       setError(null);
+      setMessage(null);
       await action();
       await refreshData();
+      setMessage("Зміни збережено.");
     } catch (mutationError) {
       setError(
         mutationError instanceof Error
@@ -607,7 +662,6 @@ export function AdminPlacesPage() {
       updateLocationType(id, {
         name: form.name.trim(),
         icon: form.icon,
-        navigationOrder: Number(form.navigationOrder),
         isVisible: form.isVisible,
       }),
     );
@@ -619,9 +673,10 @@ export function AdminPlacesPage() {
 
   return (
     <main className="places-admin-shell">
+      <AdminDraftGuard />
       <header className="content-admin-header">
         <div>
-          <span>LOCATIONS</span>
+          <span>КАРТА</span>
           <h1>Місця</h1>
           <p>Адреси, маркери та матеріали для редакційної карти.</p>
         </div>
@@ -633,7 +688,16 @@ export function AdminPlacesPage() {
         </div>
       )}
 
-      <section className="content-admin-section places-types-section">
+      {message && <p className="save-message" role="status">{message}</p>}
+      <nav className="admin-collection-tabs" aria-label="Керування місцями">
+        {[["places", "Збережені місця", places.length], ["new", "Нове місце", null], ["types", "Типи локацій", locationTypes.length]].map(([value, label, count]) => (
+          <button key={value} className="admin-button" type="button" disabled={busy} aria-pressed={tab === value}
+            onClick={() => { if (value !== tab && confirmAdminDiscard()) { setTab(String(value)); setNewPlace(emptyPlaceForm(locationTypes[0]?.id ?? "")); setNewType(emptyLocationTypeForm); } }}>
+            {label}{count !== null ? ` · ${count}` : ""}
+          </button>
+        ))}
+      </nav>
+      {tab === "types" && <section className="content-admin-section places-types-section">
         <div className="content-admin-section__heading">
           <div>
             <h2>Типи локацій</h2>
@@ -641,23 +705,13 @@ export function AdminPlacesPage() {
           </div>
         </div>
 
-        <div className="places-types-grid">
-          {locationTypes.map((locationType) => (
-            <EditableLocationType
-              key={locationType.id}
-              locationType={locationType}
-              busy={busy}
-              onSave={saveLocationType}
-              onDelete={(id) =>
-                runMutation(() => deleteLocationType(id)).then(
-                  () => undefined,
-                )
-              }
-            />
-          ))}
-        </div>
+        <AdminOrderEditor externalBusy={busy} items={locationTypes} resource="location-types" onSaved={refreshData} label="Порядок фільтрів карти" />
+        <AdminCollection busy={busy} items={locationTypes} label="Типи локацій" pageSize={6} expandable renderItem={locationType => (
+          <EditableLocationType key={JSON.stringify(locationType)} locationType={locationType} busy={busy}
+            onSave={saveLocationType} onDelete={id => runMutation(() => deleteLocationType(id)).then(() => undefined)} />
+        )} />
 
-        <div className="places-type-create">
+        <div className="places-type-create" data-admin-dirty={newType.name || newType.icon !== "coffee" ? "true" : undefined} data-editor-dirty={newType.name || newType.icon !== "coffee" ? "true" : undefined}>
           <div className="places-type-create__fields">
             <label>
               <span>Новий тип</span>
@@ -667,21 +721,6 @@ export function AdminPlacesPage() {
                 placeholder="Наприклад, Галереї"
                 onChange={(event) =>
                   setNewType({ ...newType, name: event.target.value })
-                }
-              />
-            </label>
-            <label>
-              <span>Порядок</span>
-              <input
-                type="number"
-                min="0"
-                max="999"
-                value={newType.navigationOrder}
-                onChange={(event) =>
-                  setNewType({
-                    ...newType,
-                    navigationOrder: event.target.value,
-                  })
                 }
               />
             </label>
@@ -706,7 +745,7 @@ export function AdminPlacesPage() {
                 createLocationType({
                   name: newType.name.trim(),
                   icon: newType.icon,
-                  navigationOrder: Number(newType.navigationOrder),
+                  navigationOrder: Math.min(999, Math.max(0, ...locationTypes.map(type => type.navigationOrder)) + 1),
                   isVisible: true,
                 }),
               )
@@ -722,9 +761,9 @@ export function AdminPlacesPage() {
             Додати тип
           </button>
         </div>
-      </section>
+      </section>}
 
-      <section className="content-admin-section places-admin-create">
+      {tab === "new" && <section className="content-admin-section places-admin-create" data-admin-dirty={JSON.stringify(newPlace) !== JSON.stringify(emptyPlaceForm(locationTypes[0]?.id ?? "")) ? "true" : undefined} data-editor-dirty={JSON.stringify(newPlace) !== JSON.stringify(emptyPlaceForm(locationTypes[0]?.id ?? "")) ? "true" : undefined}>
         <div className="content-admin-section__heading">
           <div>
             <h2>Нове місце</h2>
@@ -769,32 +808,19 @@ export function AdminPlacesPage() {
         >
           Додати місце
         </button>
-      </section>
+      </section>}
 
-      <section className="places-admin-list" aria-label="Збережені місця">
+      {tab === "places" && <section className="places-admin-list" aria-label="Збережені місця">
         <div className="places-admin-list__heading">
           <h2>Збережені місця</h2>
           <span>{places.length}</span>
         </div>
 
-        {places.length === 0 && (
-          <p className="content-admin-empty">Місць ще немає.</p>
-        )}
-
-        {places.map((place) => (
-          <EditablePlace
-            key={place.id}
-            place={place}
-            locationTypes={locationTypes}
-            busy={busy}
-            onError={setError}
-            onSave={savePlace}
-            onDelete={(id) =>
-              runMutation(() => deletePlace(id)).then(() => undefined)
-            }
-          />
-        ))}
-      </section>
+        <AdminCollection busy={busy} items={places} label="Місця" searchText={place => `${place.name} ${place.slug} ${place.address} ${place.type.name}`}
+          renderItem={place => <EditablePlace key={JSON.stringify(place)} place={place} locationTypes={locationTypes}
+            busy={busy} onError={setError} onSave={savePlace}
+            onDelete={id => runMutation(() => deletePlace(id)).then(() => undefined)} />} />
+      </section>}
     </main>
   );
 }

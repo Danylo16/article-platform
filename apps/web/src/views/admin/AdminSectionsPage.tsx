@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AdminCollection, AdminDraftGuard, AdminRecord } from "@/components/admin/AdminCollection";
+import { AdminOrderEditor } from "@/components/admin/AdminOrderEditor";
 
 import { getSections, updateSection } from "../../api/client";
 import type { Section } from "../../types/article";
@@ -39,6 +41,7 @@ function EditableSection({
     order > 999;
 
   return (
+    <AdminRecord title={section.name} meta={`/${section.slug} · ${section.isVisible ? "У меню" : "Прихований"} · Статей: ${section._count?.articles ?? 0}`} dirty={!unchanged}>
     <article className="sections-admin-card">
       <div className="sections-admin-card__position" aria-hidden="true">
         {section.navigationOrder.toString().padStart(2, "0")}
@@ -51,19 +54,6 @@ function EditableSection({
             value={form.name}
             maxLength={40}
             onChange={(event) => setForm({ ...form, name: event.target.value })}
-          />
-        </label>
-
-        <label>
-          <span>Порядок</span>
-          <input
-            type="number"
-            min="0"
-            max="999"
-            value={form.navigationOrder}
-            onChange={(event) =>
-              setForm({ ...form, navigationOrder: event.target.value })
-            }
           />
         </label>
 
@@ -96,6 +86,7 @@ function EditableSection({
         </button>
       </div>
     </article>
+    </AdminRecord>
   );
 }
 
@@ -142,7 +133,6 @@ export function AdminSectionsPage() {
       setMessage(null);
       await updateSection(id, {
         name: form.name.trim(),
-        navigationOrder: Number(form.navigationOrder),
         isVisible: form.isVisible,
       });
       await refreshSections();
@@ -165,6 +155,7 @@ export function AdminSectionsPage() {
 
   return (
     <main className="sections-admin-shell">
+      <AdminDraftGuard />
       <header className="content-admin-header">
         <div>
           <span>НАВІГАЦІЯ</span>
@@ -193,16 +184,10 @@ export function AdminSectionsPage() {
         </span>
       </div>
 
-      <section className="sections-admin-grid" aria-label="Розділи сайту">
-        {sections.map((section) => (
-          <EditableSection
-            key={section.id}
-            section={section}
-            busy={busy}
-            onSave={saveSection}
-          />
-        ))}
-      </section>
+      <AdminOrderEditor externalBusy={busy} items={sections} resource="sections" onSaved={refreshSections} label="Порядок головного меню" />
+      <AdminCollection busy={busy} items={sections} label="Розділи" pageSize={6} expandable renderItem={section => (
+        <EditableSection key={JSON.stringify(section)} section={section} busy={busy} onSave={saveSection} />
+      )} />
     </main>
   );
 }

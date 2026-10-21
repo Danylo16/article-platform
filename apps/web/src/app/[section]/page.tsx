@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import {
+  getPublicCategoriesEnabled,
   getPublicPlaces,
   getPublishedArticles,
   getVisibleSections,
@@ -15,9 +16,10 @@ import { LocationsPage } from "../../views/LocationsPage";
 
 type SectionRouteProps = {
   params: Promise<{ section: string }>;
+  searchParams: Promise<{ rubrik?: string | string[] }>;
 };
 
-type StaticSection = NonNullable<ReturnType<typeof getEditorialSection>>;
+type StaticSection = { name: string; slug: string; description: string };
 
 function getSectionMetadata(
   section: { name: string; slug: string },
@@ -26,9 +28,9 @@ function getSectionMetadata(
   return {
     title: section.name,
     description,
-    alternates: {
-      canonical: `/${section.slug}`,
-    },
+    alternates: { canonical: `/${section.slug}` },
+    openGraph: { type: "website", siteName: "DORIDA", title: `${section.name} | DORIDA`, description, url: `/${section.slug}`, images: [{ url: "/opengraph-image", width: 1200, height: 630 }] },
+    twitter: { card: "summary_large_image", title: `${section.name} | DORIDA`, description, images: ["/opengraph-image"] },
   } satisfies Metadata;
 }
 
@@ -49,35 +51,27 @@ export async function generateMetadata({
   const { section: sectionSlug } = await params;
   const staticSection = getEditorialSection(sectionSlug);
 
-  if (!staticSection) {
-    return {};
-  }
-
   try {
     const section = await getRequestedSection(sectionSlug);
 
     return section
-      ? getSectionMetadata(section, staticSection.description)
+      ? getSectionMetadata(section, staticSection?.description ?? `Geschichten und Perspektiven aus dem Ressort ${section.name}.`)
       : {};
   } catch {
-    return getSectionMetadata(staticSection, staticSection.description);
+    return staticSection ? getSectionMetadata(staticSection, staticSection.description) : {};
   }
 }
 
-export default async function SectionRoute({ params }: SectionRouteProps) {
+export default async function SectionRoute({ params, searchParams }: SectionRouteProps) {
   const { section: sectionSlug } = await params;
   const staticSection = getEditorialSection(sectionSlug);
-
-  if (!staticSection) {
-    notFound();
-  }
 
   let section: Awaited<ReturnType<typeof getRequestedSection>>;
 
   try {
     section = await getRequestedSection(sectionSlug);
   } catch {
-    return renderSectionLoadError(staticSection);
+    return renderSectionLoadError(staticSection ?? { name: sectionSlug, slug: sectionSlug, description: "Dieses Ressort ist gerade nicht erreichbar." });
   }
 
   if (!section) {
@@ -97,6 +91,9 @@ export default async function SectionRoute({ params }: SectionRouteProps) {
     return <LocationsPage places={places} loadError={placesLoadError} />;
   }
 
+  const query = await searchParams;
+  const categorySlug = await getPublicCategoriesEnabled() && typeof query.rubrik === "string" ? query.rubrik : undefined;
+
   let articles: Awaited<ReturnType<typeof getPublishedArticles>> = [];
   let loadError = false;
 
@@ -111,9 +108,10 @@ export default async function SectionRoute({ params }: SectionRouteProps) {
       section={{
         name: section.name,
         slug: section.slug,
-        description: staticSection.description,
+        description: staticSection?.description ?? `Geschichten und Perspektiven aus dem Ressort ${section.name}.`,
       }}
       articles={articles}
+      categorySlug={categorySlug}
       loadError={loadError}
     />
   );
